@@ -1,6 +1,6 @@
 """Dựng asset cho 1 cửa (từ cửa 2 trở đi) và GỘP vào assets/sprites.js.
 Ảnh đặt trong thư mục "CuaN", tên file bắt đầu bằng mã prompt (L2b, L2mg, ...).
-Chạy:  python tools/build_gate.py <thư mục CuaN> <số cửa> <thư mục project>
+Chạy:  python tools/build_gate.py source/02-cua2-dam-lay-doc 2 .   (tìm ảnh trong mọi thư mục con)
 Tự tách nền: xanh lá #00FF00, nền đen (JPG mất trong suốt) hoặc ảnh có alpha sẵn."""
 import sys, os, glob, json, numpy as np
 from PIL import Image, ImageFilter
@@ -13,7 +13,7 @@ for d in (SP, BGD, UID): os.makedirs(d, exist_ok=True)
 meta = json.load(open(os.path.join(OUT, 'assets', 'sprites.json')))
 
 def find(code):
-    fs = [f for f in glob.glob(os.path.join(SRC, '*')) if os.path.basename(f).split(' ')[0] == code]
+    fs = [f for f in glob.glob(os.path.join(glob.escape(SRC), '**', '*.*'), recursive=True) if os.path.basename(f).split(' ')[0] == code]
     return fs[0] if fs else None
 
 # ---------------- tách nền ----------------

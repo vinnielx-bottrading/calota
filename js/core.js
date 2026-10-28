@@ -2,7 +2,7 @@
 window.C = window.C || {};
 (function (C) {
   C.W = 1280; C.H = 720;
-  C.VERSION = '0.8.1';
+  C.VERSION = '0.8.2';
   C.skin = {}; // đổi tên sprite theo cửa (vd. beetle → g2_mosq)
 
   // ---------- tiện ích ----------

@@ -1,13 +1,23 @@
 """Cắt sprite sheet thành frame, căn neo, xuất WebP vào assets/.
-Chạy: python tools/build_assets.py <thư mục ảnh gốc CALOTA> <thư mục Điều chỉnh> <thư mục project>"""
-import sys, os, json, numpy as np
+Chạy (khuyên dùng — ảnh gốc nằm sẵn trong package):
+    python tools/build_assets.py --source source .
+Cách cũ: python tools/build_assets.py <thư mục CALOTA> <thư mục Điều chỉnh> <project> [<thư mục Phun hóa chất>]
+Ở chế độ --source, file được tìm theo TÊN trong cả cây source/ nên có thể sắp xếp lại thư mục tùy ý."""
+import sys, os, json, glob, numpy as np
 from PIL import Image, ImageFilter
 from scipy import ndimage
-SRC, ADJ, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
-FOAM = sys.argv[4] if len(sys.argv) > 4 else os.path.join(os.path.dirname(ADJ.rstrip('/\\')), 'Phun hóa chất')
-F = lambda p: os.path.join(FOAM, p)
-A = lambda p: os.path.join(SRC, p)
-J = lambda p: os.path.join(ADJ, p)
+if sys.argv[1] == '--source':
+    ROOT, OUT = sys.argv[2], sys.argv[3]
+    IDX = {os.path.basename(p): p for p in glob.glob(os.path.join(glob.escape(ROOT), '**', '*.*'), recursive=True)}
+    R = lambda p: IDX.get(os.path.basename(p), p)
+    SRC = ADJ = FOAM = os.path.join(ROOT, '00-dung-chung')
+else:
+    SRC, ADJ, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
+    FOAM = sys.argv[4] if len(sys.argv) > 4 else os.path.join(os.path.dirname(ADJ.rstrip('/\\')), 'Phun hóa chất')
+    R = lambda p: p
+F = lambda p: R(os.path.join(FOAM, p))
+A = lambda p: R(os.path.join(SRC, p))
+J = lambda p: R(os.path.join(ADJ, p))
 meta = {}
 
 def load(p):
@@ -202,7 +212,7 @@ if os.path.isdir(FOAM):
 
 # ---- Boss 1 kiểu THÙNG GỖ (thư mục "Boss") — ghi đè bản cũ nếu có
 BOSSD = os.path.join(os.path.dirname(FOAM.rstrip('/\\')), 'Boss')
-Bp = lambda p: os.path.join(BOSSD, p)
+Bp = lambda p: R(os.path.join(BOSSD, p))
 if os.path.exists(Bp('Boss1 Barrel Defeat 4f.png')):
     sheet('boss_defeat', Bp('Boss1 Barrel Defeat 4f.png'), 4, 1, 420)
 if os.path.exists(Bp('Boss1 Barrel Foam 2f.png')):
@@ -214,7 +224,7 @@ if os.path.exists(Bp('Boss1 Barrel Idle Attack 4x2.png')):  # D7 kiểu thùng g
 if os.path.exists(Bp('Boss1 Barrel Ram 4f.png')):  # lao tới & cụng
     sheet('boss_ram', Bp('Boss1 Barrel Ram 4f.png'), 4, 1, 470, body_anchor)
 # ---- Quái thường có ống pháo (thư mục "Quai")
-QD = os.path.join(os.path.dirname(BOSSD), 'Quai'); Q = lambda p: os.path.join(QD, p)
+QD = os.path.join(os.path.dirname(BOSSD), 'Quai'); Q = lambda p: R(os.path.join(QD, p))
 def minion(name, path, scale):
     fr = [main_blob(x) for x in slice_sheet(load(path), 4, 2)]; f, an = align(fr, body_anchor, scale)
     save_strip(name, f[:4], an); save_strip(name + '_shoot', f[4:], an)

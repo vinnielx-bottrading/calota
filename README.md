@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.8.1
+# CALOTA – Phi Công Hóa Chất · v0.8.2
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -70,6 +70,9 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
   - Lao tới & cụng (chiêu chung), GĐ2+ gọi bầy muỗi, GĐ3 thêm ếch.
 - Quái/vật cản cửa 2 dùng chung logic cửa 1, chỉ đổi hình qua `skin` trong `gate02.js`.
 
+## Tài nguyên gốc
+Toàn bộ ảnh và nhạc gốc nằm trong `source/`, chia theo nhóm (dùng chung, từng cửa, âm thanh, marketing). Xem `source/HUONG_DAN_ASSETS.md`.
+
 ## Cấu trúc
 ```
 index.html            giao diện + menu
@@ -133,6 +136,7 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.8.2** – Thanh HUD đổi thành DỊCH ĐỘC. Huy hiệu 16+ dời sang phải, không che logo. Thêm thư mục `source/` chứa toàn bộ ảnh + nhạc gốc chia nhóm, kèm `source/HUONG_DAN_ASSETS.md`; công cụ dựng chạy thẳng từ `source/` (`--source`).
 - **0.8.1** – Nhạc thật cho menu, đoạn bay, đánh boss, màn thắng (assets/audio, chuyển bài có fade, tự bật ở lần chạm đầu tiên). Tiếng RỐNG khi tung Tuyệt Mệnh. Khẩu hiệu mới có viền sáng, huy hiệu 16+ lắc lư, cut-in đổi thành SIÊU PHUN DỊCH ĐỘC. Nền xa + thumbnail cửa 2 bằng ảnh thật.
 - **0.8.0** – **CỬA 2 ĐẦM LẦY ĐỘC** chơi được: boss Bọ Lá Độc Gai Chúa (đạn độc, phun độc quét, cắn nọc, lao tới & cụng), muỗi + ếch độc, nền đầm lầy. Menu chọn cửa (mở khóa theo cửa đã qua), nút Cửa tiếp theo, kỷ lục riêng từng cửa. Sửa lỗi bọ lá cửa 1 bay sai (lọt sang kiểu đại bàng).
 - **0.7.1** – Tuyệt Mệnh dùng ảnh thật (gồng aura 4 frame, ngửa mặt phun trời 3 frame). Quy tắc cửa 2+ dài hơn & đông quái hơn (waves.js). Prompt v14: nhóm "Chiêu mới" M1–M6.

@@ -134,7 +134,7 @@
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + 0.4 * Math.sin(now * 8);
       ctx.drawImage(C.G.ice, bx - 30, by - 40, bw + 60, bh + 80); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     }
-    txt(ctx, 'HÓA CHẤT', bx + 8, by + bh / 2 + 1, 15, '#fff', 'left', '#0b3a5a');
+    txt(ctx, 'DỊCH ĐỘC', bx + 8, by + bh / 2 + 1, 15, '#fff', 'left', '#0b3a5a');
     if (full && !g.ultActive) txt(ctx, C.input.usingTouch ? 'SIÊU PHUN SẴN SÀNG!' : 'SIÊU PHUN SẴN SÀNG · [K]', bx, by + bh + 20, 17, '#ffffff', 'left', '#0b3a5a');
     // thanh NỘ — chiêu Tuyệt Mệnh
     const rk = (g.rage || 0) / 100, ry = 124, rfull = rk >= 1 && !g.rageActive;

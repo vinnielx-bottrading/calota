@@ -53,7 +53,7 @@
       case 'coin': g.coins++; g.score += 50; C.sfx.play('pickup');
         if (g.gunLv < 3 && ++g.gunXP >= (g.gunLv === 1 ? 10 : 18)) { g.gunLv++; g.gunXP = 0; C.sfx.play('shield'); C.flash(0.2, '#ffd34d'); g.banner('SÚNG CẤP ' + g.gunLv + '!', 1.4, 'small'); }
         break;
-      case 'bolt': g.addGauge(45); C.sfx.play('pickup'); C.dmgText(it.x, it.y - 20, 45, '#b6ff3a', 30); g.banner('+ HÓA CHẤT', 0.9, 'small'); break;
+      case 'bolt': g.addGauge(45); C.sfx.play('pickup'); C.dmgText(it.x, it.y - 20, 45, '#b6ff3a', 30); g.banner('+ DỊCH ĐỘC', 0.9, 'small'); break;
       case 'heart': g.player.hp = Math.min(g.player.maxHp, g.player.hp + 1); C.sfx.play('pickup'); break;
       case 'shield': g.player.shield = 1; C.sfx.play('shield'); break;
     }
