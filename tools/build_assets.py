@@ -11,7 +11,30 @@ J = lambda p: os.path.join(ADJ, p)
 meta = {}
 
 def load(p):
-    return Image.open(p).convert('RGBA')
+    im = Image.open(p)
+    if im.mode == 'RGB':  # nền xanh lá #00FF00 → tách nền
+        a = np.array(im).astype(int)
+        if ((a[..., 1] > 200) & (a[..., 0] < 60) & (a[..., 2] < 60)).mean() > 0.2: return key_green(p)
+    return im.convert('RGBA')
+def key_green(path):
+    a = np.array(Image.open(path).convert('RGBA')).astype(float)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    if (a[..., 3] < 255).mean() > 0.2:  # đã có alpha
+        al = a[..., 3]
+    else:
+        d = g - np.maximum(r, b)
+        al = 255 * (1 - np.clip((d - 30) / 90, 0, 1))
+    # khử viền xanh lá
+    g2 = np.minimum(g, np.maximum(r, b) + 10); a[..., 1] = np.where(al < 255, g2, g)
+    # khử viền đỏ/hồng do lần tách nền trước (pixel bán trong suốt màu đỏ thuần)
+    fringe = (al < 235) & (r > 140) & (g < 95) & (b < 95)
+    al = np.where(fringe, 0, al)
+    m = ndimage.binary_erosion(al > 128, iterations=1)
+    al = np.where(m | (al > 250), al, al * 0.5)
+    al[al < 40] = 0
+    a[..., 3] = al
+    return Image.fromarray(a.clip(0, 255).astype(np.uint8), 'RGBA')
+
 
 def splits(profile, n, lo_frac=0.25):
     L = len(profile); cuts = [0]
@@ -53,6 +76,13 @@ def lens_anchor(im):
 def mass_anchor(im):
     al = np.array(im)[..., 3].astype(float)
     ys, xs = np.nonzero(al > 128); return xs.mean(), ys.mean()
+
+def body_anchor(im):
+    al = np.array(im)[..., 3] > 128
+    lab, n = ndimage.label(ndimage.binary_opening(al, structure=np.ones((5, 5))))
+    if n == 0: return mass_anchor(im)
+    k = int(np.argmax(ndimage.sum(al, lab, range(1, n + 1)))) + 1
+    ys, xs = np.nonzero(lab == k); return xs.mean(), ys.mean()
 
 def align(frames, anchor_fn, scale):
     frames = [clean_alpha(f) for f in frames]
@@ -167,6 +197,8 @@ if os.path.isdir(FOAM):
     bf = slice_sheet(key_checker(F('Foam-Covered Spiky Airship Duo.png')), 2, 1)
     f2, an2 = align(bf, mass_anchor, 420); save_strip('boss_foam', f2, an2)
     single('logo', F('Glossy CALOTA Cartoon Game Logo.png'), 900)
+    if os.path.exists(F('Tuyet Menh Gong Aura 4f.png')): sheet('calota_rage_charge', F('Tuyet Menh Gong Aura 4f.png'), 4, 1, 300, lens_anchor)
+    if os.path.exists(F('Tuyet Menh Phun Troi 3f.png')): sheet('calota_rage_sky', F('Tuyet Menh Phun Troi 3f.png'), 3, 1, 300, lens_anchor)
 
 # ---- Boss 1 kiểu THÙNG GỖ (thư mục "Boss") — ghi đè bản cũ nếu có
 BOSSD = os.path.join(os.path.dirname(FOAM.rstrip('/\\')), 'Boss')
@@ -175,10 +207,19 @@ if os.path.exists(Bp('Boss1 Barrel Defeat 4f.png')):
     sheet('boss_defeat', Bp('Boss1 Barrel Defeat 4f.png'), 4, 1, 420)
 if os.path.exists(Bp('Boss1 Barrel Foam 2f.png')):
     sheet('boss_foam', Bp('Boss1 Barrel Foam 2f.png'), 2, 1, 420)
-if os.path.exists(Bp('Boss1 Barrel Idle Attack 4x2.png')):  # bản D7 kiểu thùng gỗ (chờ gen)
+if os.path.exists(Bp('Boss1 Barrel Idle Attack 4x2.png')):  # D7 kiểu thùng gỗ
     bb = slice_sheet(load(Bp('Boss1 Barrel Idle Attack 4x2.png')), 4, 2)
-    bf2, ban2 = align([main_blob(b) for b in bb], mass_anchor, 420)
+    bf2, ban2 = align([main_blob(b) for b in bb], body_anchor, 420)
     save_strip('boss_idle', bf2[:4], ban2); save_strip('boss_attack', bf2[4:], ban2)
+if os.path.exists(Bp('Boss1 Barrel Ram 4f.png')):  # lao tới & cụng
+    sheet('boss_ram', Bp('Boss1 Barrel Ram 4f.png'), 4, 1, 470, body_anchor)
+# ---- Quái thường có ống pháo (thư mục "Quai")
+QD = os.path.join(os.path.dirname(BOSSD), 'Quai'); Q = lambda p: os.path.join(QD, p)
+def minion(name, path, scale):
+    fr = [main_blob(x) for x in slice_sheet(load(path), 4, 2)]; f, an = align(fr, body_anchor, scale)
+    save_strip(name, f[:4], an); save_strip(name + '_shoot', f[4:], an)
+if os.path.exists(Q('Cua1 Bo La Rang Nanh 4x2.png')): minion('beetle', Q('Cua1 Bo La Rang Nanh 4x2.png'), 240)
+if os.path.exists(Q('Cua1 Ken Ken Ong Long 4x2.png')): minion('eagle', Q('Cua1 Ken Ken Ong Long 4x2.png'), 270)
 
 # ---- Nền
 bgdir = os.path.join(OUT, 'assets', 'bg'); os.makedirs(bgdir, exist_ok=True)
@@ -200,6 +241,12 @@ fgim = fgim.resize((1600, round(fgim.height * 1600 / fgim.width)), Image.LANCZOS
 # icon & thumbnail
 th = Image.open(A('D. Mẫu asset mỗi cửa — thay [ … ] khi có danh sách cửa/Whimsical Sky-Island Adventure.png')).convert('RGB')
 th.resize((640, 640), Image.LANCZOS).save(os.path.join(OUT, 'assets', 'ui', 'g1_thumb.webp') if os.makedirs(os.path.join(OUT, 'assets', 'ui'), exist_ok=True) is None else '', quality=85)
+# giữ lại asset các cửa sau (g2_, g3_ ...) do build_gate.py tạo
+try:
+    import re as _re
+    for k, v in json.load(open(os.path.join(OUT, 'assets', 'sprites.json'))).items():
+        if _re.match(r'^g\d+_', k) and k not in meta: meta[k] = v
+except Exception: pass
 json.dump(meta, open(os.path.join(OUT, 'assets', 'sprites.json'), 'w'), indent=1)
 print(json.dumps({k: (v['fw'], v['fh'], v['n']) for k, v in meta.items()}))
 # file JS để chạy được cả khi mở index.html trực tiếp (file://)

@@ -17,6 +17,7 @@
     const p = g.player, I = C.input;
     p.anim += dt;
     if (p.dead) { p.deadT += dt; p.vy += 900 * dt; p.y += p.vy * dt; p.x += p.vx * dt; return; }
+    if (g.rageActive) { p.vx = p.vy = 0; p.inv -= dt; I.consumeTouchDelta(); return; } // đứng yên gồng
     const sp = 520;
     let tx = I.moveX * sp, ty = I.moveY * sp;
     const d = I.consumeTouchDelta();
@@ -50,7 +51,8 @@
   };
   E.hurtPlayer = function (g, dmg) {
     const p = g.player;
-    if (p.inv > 0 || p.dead || g.ultActive || g.state !== 'play') return false;
+    if (p.inv > 0 || p.dead || g.ultActive || g.rageActive || g.state !== 'play') return false;
+    C.Rage.add(g, 12); // trúng đòn → nộ tăng
     if (p.shield > 0) { p.shield = 0; p.inv = 1; C.sfx.play('shieldBreak'); C.flash(0.3, '#7fd8ff'); for (let i = 0; i < 16; i++) { const a = i / 16 * 6.28; C.emit({ kind: 'glow', img: C.G.teal, x: p.x, y: p.y, vx: Math.cos(a) * 400, vy: Math.sin(a) * 400, drag: 3, max: 0.5, s0: 14, s1: 4, add: true, layer: 2 }); } return true; }
     if ((g.gunLv || 1) > 1) { g.gunLv--; g.gunXP = 0; g.banner('Súng tụt cấp ' + g.gunLv, 1.2, 'small'); }
     p.hp -= dmg; p.inv = 1.4; p.hurtT = 0.45; C.shake(14); C.flash(0.35, '#ff3b30'); C.sfx.play('hurt');
@@ -61,6 +63,7 @@
   };
   E.drawPlayer = function (ctx, g) {
     const p = g.player;
+    if (g.rageActive) { C.Rage.drawCalota(ctx, g); return; }
     if (p.inv > 0 && !p.dead && Math.floor(p.inv * 20) % 2 === 0 && p.hurtT < 0) ctx.globalAlpha = 0.45;
     const tilt = C.clamp(p.vy / 1400, -0.18, 0.22);
     if (p.dead) C.spr(ctx, 'calota_fall', 0, p.x, p.y, 160, { rot: p.deadT * 6 });
@@ -92,6 +95,8 @@
     }
     for (const b of g.ebullets) {
       if (b.kind === 'spike') C.spr(ctx, 'spikeball', 0, b.x, b.y, b.r * 2.6, { rot: b.rot });
+      else if (b.kind === 'venom') C.spr(ctx, 'g2_proj_big', 0, b.x, b.y, b.r * 3.6, { rot: Math.atan2(b.vy, b.vx) + Math.PI });
+      else if (b.kind === 'glob') C.spr(ctx, 'g2_venom_glob', 0, b.x, b.y, b.r * 3.2, { rot: b.rot });
       else { ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(C.G.red, b.x - b.r * 2, b.y - b.r * 2, b.r * 4, b.r * 4); ctx.globalCompositeOperation = 'source-over'; }
     }
   };
@@ -102,8 +107,8 @@
     o = o || {};
     const e = { type, t: 0, x: o.x || C.W + 120, y: o.y || 360, y0: o.y || 360, hp: 1, maxHp: 1, r: 40, dead: false, flash: 0, corr: 0, ...o };
     switch (type) {
-      case 'beetle': e.hp = 45; e.r = 34; e.w = 96; e.speed = o.speed || 240; e.amp = o.amp == null ? 60 : o.amp; e.freq = o.freq || 3; e.score = 100; break;
-      case 'eagle': e.hp = 140; e.r = 42; e.w = 130; e.speed = 330; e.phase = 'enter'; e.score = 220; break;
+      case 'beetle': e.hp = 45; e.r = 38; e.w = 118; e.shootT = Math.random() < (g.gate ? C.gateRule(g.gate.id).shooterChance : 0.45) ? C.rand(1.2, 3) : Infinity; /* tỉ lệ bọ có nạp đạn tăng theo cửa */ e.speed = o.speed || 240; e.amp = o.amp == null ? 60 : o.amp; e.freq = o.freq || 3; e.score = 100; break;
+      case 'eagle': e.hp = 140; e.r = 46; e.w = 150; e.speed = 330; e.phase = 'enter'; e.score = 220; break;
       case 'rock': e.hp = 260; e.r = 52; e.w = 120; e.speed = o.speed || 170; e.rotS = C.rand(-1, 1); e.score = 150; e.solid = true; break;
       case 'vine': e.hp = 90; e.r = 50; e.w = 150; e.speed = 200; e.sprayOnly = true; e.score = 180; e.solid = true; break;
       case 'pillarTop': e.hp = Infinity; e.w = o.w || 250; e.speed = 200; e.static = true; e.solid = true; e.h = C.sprH('pillar_top', e.w); e.y = e.h / 2 - (o.cut || 30); break;
@@ -123,14 +128,29 @@
     }
     return [[e.x, e.y, e.r]];
   };
+  /** quái bắn 1 viên gai nhắm vào Calota. muzzle ≈ đầu nòng ở phía trên-trái thân */
+  E.enemyShot = function (g, e, r, speed, ox, oy) {
+    const x = e.x + e.w * ox, y = e.y + e.w * oy, p = g.player;
+    const a = Math.atan2(p.y - y, p.x - x);
+    g.ebullets.push({ kind: 'spike', x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, r, rot: 0, vr: C.rand(-6, 6), hp: r > 20 ? 2 : 1 });
+    C.emit({ kind: 'img', img: 'muzzle', x: x - 30, y, max: 0.15, s0: r * 4, s1: r * 5, layer: 2, rot: Math.PI });
+    C.sfx.play(r > 20 ? 'bossShot' : 'hit');
+  };
   E.updateEnemy = function (g, e, dt) {
     e.t += dt; e.flash -= dt; if (e.corr > 0) e.corr -= dt * 0.8;
     const p = g.player;
     switch (e.type) {
-      case 'beetle': e.x -= e.speed * dt; e.y = e.y0 + Math.sin(e.t * e.freq) * e.amp; break;
-      case 'eagle':
-        if (e.phase === 'enter') { e.x -= e.speed * dt; e.y = C.lerp(e.y, p.y, dt * 0.8); if (e.x < (e.stopX || 980)) { e.phase = 'aim'; e.t = 0; C.sfx.play('warn'); } }
-        else if (e.phase === 'aim') { e.x += Math.sin(e.t * 40) * 1.2; if (e.t > 0.55) { e.phase = 'dive'; const a = Math.atan2(p.y - e.y, p.x - e.x); e.dvx = Math.cos(a) * 720; e.dvy = Math.sin(a) * 720; } }
+      case 'beetle': // Bọ Lá Răng Nanh: bay lượn, thỉnh thoảng nã 1 viên gai từ ống pháo trên lưng
+        e.x -= e.speed * dt; e.y = e.y0 + Math.sin(e.t * e.freq) * e.amp;
+        e.shootT -= dt;
+        if (e.shootT <= 0 && e.x < C.W - 60 && e.x > p.x + 160 && !p.dead) { e.shootT = C.rand(2.4, 3.8); e.shotAt = e.t; }
+        if (e.shotAt != null && e.t - e.shotAt > 0.22 && !e.fired) { e.fired = true; E.enemyShot(g, e, 14, 400, -0.42, -0.26); }
+        if (e.shotAt != null && e.t - e.shotAt > 0.55) { e.shotAt = null; e.fired = false; }
+        break;
+      case 'eagle': // Kền Kền ống lồng 3 tầng: dừng lại, kéo dài nòng, nã 1 phát nặng giật lùi, rồi bổ nhào
+        if (e.phase === 'enter') { e.x -= e.speed * dt; e.y = C.lerp(e.y, p.y, dt * 0.8); if (e.x < (e.stopX || 980) + (C.W - 1280)) { e.phase = 'aim'; e.t = 0; C.sfx.play('warn'); } }
+        else if (e.phase === 'aim') { e.y = C.lerp(e.y, p.y, dt * 1.5); if (e.t > 0.7) { e.phase = 'fire'; e.t = 0; E.enemyShot(g, e, 24, 600, -0.4, -0.3); e.x += 40; C.shake(5); } }
+        else if (e.phase === 'fire') { if (e.t > 0.7) { e.phase = 'dive'; const a = Math.atan2(p.y - e.y, p.x - e.x); e.dvx = Math.cos(a) * 720; e.dvy = Math.sin(a) * 720; } }
         else { e.x += e.dvx * dt; e.y += e.dvy * dt; }
         break;
       case 'rock': e.x -= e.speed * dt; e.y = e.y0 + Math.sin(e.t * 1.4) * 18; e.rot = (e.rot || 0) + e.rotS * dt; break;
@@ -148,10 +168,15 @@
       else C.spr(ctx, name, f, x, y, w, o);
     };
     switch (e.type) {
-      case 'beetle': draw('beetle', Math.floor(e.t * 14), e.x, e.y, e.w); break;
+      case 'beetle':
+        if (e.shotAt != null) draw('beetle_shoot', Math.min(3, Math.floor((e.t - e.shotAt) / 0.14)), e.x, e.y, e.w);
+        else draw('beetle', Math.floor(e.t * 12), e.x, e.y, e.w);
+        break;
       case 'eagle': {
-        const f = e.phase === 'dive' ? 2 : Math.floor(e.t * 10);
-        draw('eagle', f, e.x, e.y, e.w, { rot: e.phase === 'dive' ? C.angleDiff(Math.atan2(e.dvy, e.dvx), Math.PI) : 0 });
+        const rot = e.phase === 'dive' ? C.angleDiff(Math.atan2(e.dvy, e.dvx), Math.PI) : 0;
+        if (e.phase === 'aim') draw('eagle_shoot', e.t < 0.35 ? 0 : 1, e.x, e.y, e.w);                 // kéo dài nòng lồng
+        else if (e.phase === 'fire') draw('eagle_shoot', e.t < 0.2 ? 2 : 3, e.x, e.y, e.w);            // nổ nòng + khói
+        else draw('eagle', Math.floor(e.t * 10), e.x, e.y, e.w, { rot });
         if (e.phase === 'aim') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(e.t * 40); ctx.drawImage(C.G.red, e.x - 70, e.y - 50, 60, 60); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
         break;
       }

@@ -57,35 +57,35 @@
  },
  "beetle": {
   "file": "assets/sprites/beetle.webp",
-  "fw": 200,
-  "fh": 178,
+  "fw": 240,
+  "fh": 208,
   "n": 4,
-  "ax": 96.2,
-  "ay": 90.8
+  "ax": 129.9,
+  "ay": 102.6
  },
  "eagle": {
   "file": "assets/sprites/eagle.webp",
-  "fw": 220,
-  "fh": 198,
+  "fw": 270,
+  "fh": 240,
   "n": 4,
-  "ax": 114.5,
-  "ay": 107.9
+  "ax": 138.9,
+  "ay": 115.6
  },
  "boss_idle": {
   "file": "assets/sprites/boss_idle.webp",
   "fw": 420,
-  "fh": 380,
+  "fh": 345,
   "n": 4,
-  "ax": 238.0,
-  "ay": 199.9
+  "ax": 233.9,
+  "ay": 185.8
  },
  "boss_attack": {
   "file": "assets/sprites/boss_attack.webp",
   "fw": 420,
-  "fh": 380,
+  "fh": 345,
   "n": 4,
-  "ax": 238.0,
-  "ay": 199.9
+  "ax": 233.9,
+  "ay": 185.8
  },
  "boss_defeat": {
   "file": "assets/sprites/boss_defeat.webp",
@@ -240,5 +240,229 @@
   "n": 1,
   "ax": 453.1,
   "ay": 130.6
+ },
+ "calota_rage_charge": {
+  "file": "assets/sprites/calota_rage_charge.webp",
+  "fw": 300,
+  "fh": 257,
+  "n": 4,
+  "ax": 142.8,
+  "ay": 99.8
+ },
+ "calota_rage_sky": {
+  "file": "assets/sprites/calota_rage_sky.webp",
+  "fw": 272,
+  "fh": 300,
+  "n": 3,
+  "ax": 64.8,
+  "ay": 154.3
+ },
+ "boss_ram": {
+  "file": "assets/sprites/boss_ram.webp",
+  "fw": 470,
+  "fh": 429,
+  "n": 4,
+  "ax": 249.0,
+  "ay": 205.6
+ },
+ "beetle_shoot": {
+  "file": "assets/sprites/beetle_shoot.webp",
+  "fw": 240,
+  "fh": 208,
+  "n": 4,
+  "ax": 129.9,
+  "ay": 102.6
+ },
+ "eagle_shoot": {
+  "file": "assets/sprites/eagle_shoot.webp",
+  "fw": 270,
+  "fh": 240,
+  "n": 4,
+  "ax": 138.9,
+  "ay": 115.6
+ },
+ "g2_boss_idle": {
+  "file": "assets/sprites/g2_boss_idle.webp",
+  "fw": 440,
+  "fh": 414,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 207.0
+ },
+ "g2_boss_attack": {
+  "file": "assets/sprites/g2_boss_attack.webp",
+  "fw": 440,
+  "fh": 414,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 207.0
+ },
+ "g2_boss_ram": {
+  "file": "assets/sprites/g2_boss_ram.webp",
+  "fw": 480,
+  "fh": 420,
+  "n": 4,
+  "ax": 240.0,
+  "ay": 210.0
+ },
+ "g2_boss_spray": {
+  "file": "assets/sprites/g2_boss_spray.webp",
+  "fw": 520,
+  "fh": 376,
+  "n": 4,
+  "ax": 260.0,
+  "ay": 188.0
+ },
+ "g2_boss_bite": {
+  "file": "assets/sprites/g2_boss_bite.webp",
+  "fw": 467,
+  "fh": 470,
+  "n": 4,
+  "ax": 233.5,
+  "ay": 235.0
+ },
+ "g2_boss_defeat": {
+  "file": "assets/sprites/g2_boss_defeat.webp",
+  "fw": 423,
+  "fh": 440,
+  "n": 4,
+  "ax": 211.5,
+  "ay": 220.0
+ },
+ "g2_boss_foam": {
+  "file": "assets/sprites/g2_boss_foam.webp",
+  "fw": 440,
+  "fh": 361,
+  "n": 2,
+  "ax": 220.0,
+  "ay": 180.5
+ },
+ "g2_mosq": {
+  "file": "assets/sprites/g2_mosq.webp",
+  "fw": 210,
+  "fh": 177,
+  "n": 4,
+  "ax": 105.0,
+  "ay": 88.5
+ },
+ "g2_mosq_shoot": {
+  "file": "assets/sprites/g2_mosq_shoot.webp",
+  "fw": 210,
+  "fh": 177,
+  "n": 4,
+  "ax": 105.0,
+  "ay": 88.5
+ },
+ "g2_frog": {
+  "file": "assets/sprites/g2_frog.webp",
+  "fw": 230,
+  "fh": 199,
+  "n": 4,
+  "ax": 115.0,
+  "ay": 99.5
+ },
+ "g2_frog_shoot": {
+  "file": "assets/sprites/g2_frog_shoot.webp",
+  "fw": 230,
+  "fh": 199,
+  "n": 4,
+  "ax": 115.0,
+  "ay": 99.5
+ },
+ "g2_pillar_top": {
+  "file": "assets/sprites/g2_pillar_top.webp",
+  "fw": 452,
+  "fh": 520,
+  "n": 1,
+  "ax": 226.0,
+  "ay": 260.0
+ },
+ "g2_pillar_bottom": {
+  "file": "assets/sprites/g2_pillar_bottom.webp",
+  "fw": 475,
+  "fh": 520,
+  "n": 1,
+  "ax": 237.5,
+  "ay": 260.0
+ },
+ "g2_rock": {
+  "file": "assets/sprites/g2_rock.webp",
+  "fw": 210,
+  "fh": 207,
+  "n": 1,
+  "ax": 105.0,
+  "ay": 103.5
+ },
+ "g2_vine": {
+  "file": "assets/sprites/g2_vine.webp",
+  "fw": 280,
+  "fh": 146,
+  "n": 1,
+  "ax": 140.0,
+  "ay": 73.0
+ },
+ "g2_proj_big": {
+  "file": "assets/sprites/g2_proj_big.webp",
+  "fw": 180,
+  "fh": 92,
+  "n": 1,
+  "ax": 90.0,
+  "ay": 46.0
+ },
+ "g2_proj_small": {
+  "file": "assets/sprites/g2_proj_small.webp",
+  "fw": 160,
+  "fh": 90,
+  "n": 1,
+  "ax": 80.0,
+  "ay": 45.0
+ },
+ "g2_muzzle": {
+  "file": "assets/sprites/g2_muzzle.webp",
+  "fw": 220,
+  "fh": 133,
+  "n": 1,
+  "ax": 110.0,
+  "ay": 66.5
+ },
+ "g2_impact": {
+  "file": "assets/sprites/g2_impact.webp",
+  "fw": 240,
+  "fh": 177,
+  "n": 1,
+  "ax": 120.0,
+  "ay": 88.5
+ },
+ "g2_venom_glob": {
+  "file": "assets/sprites/g2_venom_glob.webp",
+  "fw": 150,
+  "fh": 85,
+  "n": 1,
+  "ax": 75.0,
+  "ay": 42.5
+ },
+ "g2_venom_puddle": {
+  "file": "assets/sprites/g2_venom_puddle.webp",
+  "fw": 220,
+  "fh": 134,
+  "n": 1,
+  "ax": 110.0,
+  "ay": 67.0
+ },
+ "g2_venom_splash": {
+  "file": "assets/sprites/g2_venom_splash.webp",
+  "fw": 240,
+  "fh": 172,
+  "n": 1,
+  "ax": 120.0,
+  "ay": 86.0
+ },
+ "g2_venom_slash": {
+  "file": "assets/sprites/g2_venom_slash.webp",
+  "fw": 200,
+  "fh": 166,
+  "n": 1,
+  "ax": 100.0,
+  "ay": 83.0
  }
 }

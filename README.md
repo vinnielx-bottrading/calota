@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.5.2
+# CALOTA – Phi Công Hóa Chất · v0.8.0
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -36,6 +36,7 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 | Bắn | Tự động | Tự động |
 | **Phun hóa chất** | Giữ `Space` / `J` | Giữ nút **PHUN** |
 | **Siêu phun** (thanh đầy) | `K` / `E` | Nút **SIÊU PHUN** |
+| **Tuyệt Mệnh** (thanh Nộ đầy) | `Q` / `U` | Nút **TUYỆT MỆNH** (nhấp nháy khi sẵn sàng) |
 | Lướt né | `Shift` / `L` | Nút **LƯỚT** |
 | Tạm dừng | `P` / `Esc` | Nút ❚❚ |
 
@@ -46,6 +47,7 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 - **Bọt bám lâu:** vết bọt dính lên boss/quái/cột đá 5–8 giây, chảy xệ và nhỏ giọt; giọt rơi đọng thành vũng dưới đất ~8 giây; Siêu phun văng bọt lên màn hình 3–4 giây.
 - **Ngộp bọt (trước là Ăn mòn):** mỗi 0,3 giây bị xịt boss +1 tầng (tối đa 10), mỗi tầng **+8% sát thương từ mọi nguồn**. Ngừng xịt 1,2 giây thì giảm dần. Boss phủ bọt, nhỏ giọt; từ 8 tầng chuyển sang sprite boss ngộp bọt.
 - **Siêu phun:** cut-in anime 0,95s (thời gian gần như dừng) → sóng xung kích quét sạch quái nhỏ → luồng khổng lồ 2,8s, Calota bất tử, sát thương ×3,5, ăn mòn tối đa rất nhanh.
+- **Tuyệt Mệnh (chiêu thứ 3):** thanh **Nộ** nạp chậm theo thời gian, nạp rất nhanh khi quái/đạn vây quanh (mỗi mối nguy trong bán kính ~300px), +12 khi trúng đòn, +2 mỗi quái hạ. Đầy → Calota đứng lại gồng aura 1,1s (thế giới gần như dừng, đạn bị đẩy ra), rồi ngửa mặt phun cột bọt lên trời 3,4s: bọt đổ mưa khắp màn hình, quét sạch quái và đạn, boss mất ~5.000–6.000 máu và CHOÁNG 2,5s. Bất tử suốt chiêu.
 - **Giáp rêu** (boss giai đoạn 2 và 3): đạn thường chỉ gây 20%, hóa chất gây 300%, Siêu phun 400%.
 
 ## Cửa 1 – Rừng Đá Đảo Trời
@@ -53,9 +55,20 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 - **Boss: Khinh Khí Cầu Gai Rêu** – 30.000 máu (trâu):
   - GĐ1 (>66%): bắn cầu gai nhắm thẳng, loạt 3 phát.
   - GĐ2 (66–33%): giáp rêu 2.000, bắn tỏa 3, triệu hồi bọ lá.
-  - GĐ3 (<33%): giáp rêu 2.600, nổi giận đỏ, bắn tỏa 5, **húc ngang** có vạch đỏ báo trước.
+  - GĐ3 (<33%): giáp rêu 2.600, nổi giận đỏ, bắn tỏa 5.
+  - **Lao tới & cụng** (chiêu chung mọi boss): có vạch đỏ báo trước, dùng ở cả 3 giai đoạn, càng về sau càng dồn dập (13s → 10s → 7s); cụng vào mép trái tạo sóng chấn động.
   - Thua khi đang đánh boss → nút **Đánh lại Boss** (không phải bay lại từ đầu).
 - Bot ngắm hoàn hảo hạ boss: súng cấp 1 ~78s, cấp 2 ~62s, cấp 3 ~45s. Người chơi thật khoảng 1,5–2 phút.
+
+## Cửa 2 – Đầm Lầy Độc
+- Mở khóa khi hạ boss cửa 1 (menu có thẻ chọn cửa; thêm `?all` vào link để mở hết khi thử, `?gate=2` vào thẳng cửa 2, `?gate=2&boss` vào thẳng boss).
+- Đoạn bay ~105 giây, quái ×1,35: **Muỗi Pháo Độc** (bầy, 53% có bắn), **Ếch Độc Nòng Lồng** (quái nặng), gốc cây độc, đá rêu, dây độc.
+- **Boss: Bọ Lá Độc Gai Chúa** – 38.000 máu, giáp lá độc 2.400/3.120:
+  - Đạn độc từ nòng pháo trên lưng (1 → tỏa 3 → tỏa 5).
+  - **Phun độc quét**: nòng phồng lên + quạt cảnh báo xanh → quét luồng giọt độc rơi thành vũng. Bọt hóa chất của Calota hòa tan được giọt độc.
+  - **Cắn nọc** (từ GĐ2): vạch nhắm xanh → lao tới đớp vào chỗ Calota đứng, vãi giọt độc.
+  - Lao tới & cụng (chiêu chung), GĐ2+ gọi bầy muỗi, GĐ3 thêm ếch.
+- Quái/vật cản cửa 2 dùng chung logic cửa 1, chỉ đổi hình qua `skin` trong `gate02.js`.
 
 ## Cấu trúc
 ```
@@ -66,7 +79,9 @@ js/input.js           bàn phím + cảm ứng
 js/audio.js           âm thanh & nhạc tổng hợp (WebAudio, không cần file)
 js/fx.js              hạt, rung, chữ sát thương, HỆ THỐNG PHUN HÓA CHẤT
 js/entities.js        Calota, đạn, quái, vật cản, vật phẩm
-js/gates/gate01.js    kịch bản Cửa 1 + boss Khinh Khí Cầu Gai Rêu
+js/gates/gate01.js    kịch bản Cửa 1 + boss Khinh Khí Cầu Gai Rêu (khung boss dùng chung)
+js/gates/gate02.js    Cửa 2 Đầm Lầy Độc + boss Bọ Lá Độc Gai Chúa
+tools/build_gate.py   cắt ảnh cửa 2+ (thư mục CuaN, tên file bắt đầu bằng mã prompt)
 js/game.js            vòng lặp, va chạm, phun, Siêu phun
 js/render.js          vẽ cảnh, HUD, cut-in
 js/main.js            menu, thắng/thua, PWA, khởi động
@@ -83,11 +98,23 @@ vercel.json               cấu hình cache khi deploy
 sw.js, manifest.webmanifest  PWA
 ```
 
+## Quy tắc độ khó theo cửa (`js/gates/waves.js`)
+| Cửa | Đoạn bay | Mật độ quái | Quái có bắn | Máu boss |
+|---|---|---|---|---|
+| 1 | 80s (kịch bản tay) | ×1 | 45% | 30.000 |
+| 2 | 105s | ×1,35 | 53% | 38.000 |
+| 3 | 130s | ×1,7 | 61% | 46.000 |
+| 4 | 155s | ×2,05 | 69% | 54.000 |
+| 5 | 180s | ×2,4 | 77% | 62.000 |
+| 6 | 205s | ×2,75 | 85% | 70.000 |
+| 7 | 230s | ×3,1 | 90% | 78.000 |
+`C.makeTimeline({ n, minions, obstacles, banner })` tự sinh đợt quái theo nhịp 12s, dày dần về cuối cửa.
+
 ## Thêm cửa mới
 1. Tạo ảnh bằng prompt trong `docs/CALOTA_PROMPTS.html`.
-2. Thêm dòng cắt ảnh vào `tools/build_assets.py`, chạy:
-   `python tools/build_assets.py "<thư mục ảnh gốc>" "<thư mục Điều chỉnh>" . "<thư mục Phun hóa chất>"`
-3. Tạo `js/gates/gate02.js` theo mẫu `gate01.js` (`timeline()` + `makeBoss()`), thêm `<script>` vào `index.html`.
+2. Đặt ảnh vào thư mục `CuaN` (tên file bắt đầu bằng mã prompt, vd. `L3b ...jpg`), thêm dòng cắt ảnh vào `tools/build_gate.py`, chạy:
+   `python tools/build_gate.py CuaN N .`
+3. Tạo `js/gates/gate0N.js` theo mẫu `gate02.js` (skin + `makeTimeline` + boss kế thừa `C.BossBase()`), thêm `<script>` vào `index.html` và số cửa vào vòng nạp nền trong `C.assetList`.
 
 ## Ủng hộ
 - Bảng Ủng hộ tự hiện **1 lần khi mở game** (mỗi phiên), **sau khi thắng cửa**, và **1 lần/phiên khi thua**; luôn có nút Ủng hộ ở menu, màn thắng, màn thua.
@@ -106,6 +133,12 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.8.0** – **CỬA 2 ĐẦM LẦY ĐỘC** chơi được: boss Bọ Lá Độc Gai Chúa (đạn độc, phun độc quét, cắn nọc, lao tới & cụng), muỗi + ếch độc, nền đầm lầy. Menu chọn cửa (mở khóa theo cửa đã qua), nút Cửa tiếp theo, kỷ lục riêng từng cửa. Sửa lỗi bọ lá cửa 1 bay sai (lọt sang kiểu đại bàng).
+- **0.7.1** – Tuyệt Mệnh dùng ảnh thật (gồng aura 4 frame, ngửa mặt phun trời 3 frame). Quy tắc cửa 2+ dài hơn & đông quái hơn (waves.js). Prompt v14: nhóm "Chiêu mới" M1–M6.
+- **0.7.0** – Chiêu TUYỆT MỆNH (thanh Nộ, gồng aura, phun cột bọt lên trời, mưa bọt toàn màn). Kế hoạch 7 cửa: cửa 2 Đầm Lầy Độc – boss Bọ Lá Độc Gai Chúa, cửa 3 Hẻm Núi Cát Đỏ – boss Kền Kền Chúa Ống Lồng (bản tiến hóa khổng lồ của quái cửa 1).
+- **0.6.0** – Cửa 1 đủ bộ bắt buộc: boss thùng gỗ (đứng yên + bắn, lao tới & cụng), Bọ Lá Răng Nanh (~45% có bắn viên gai), Kền Kền ống lồng (dừng, kéo nòng, nã phát nặng rồi bổ nhào). build_assets tự tách nền xanh lá #00FF00 và xóa viền đỏ; ảnh quái để trong thư mục `Quai/` cạnh `Boss/`.
+- **0.5.4** – Boss lao tới & cụng ở mọi giai đoạn. Prompt v11: quái hung tợn (hàm rộng răng nanh), ống pháo lồng nhiều tầng theo cửa, Kền Kền thay Đại Bàng, Bọ Lá Độc Gai cửa 2 (phun độc, cắn nọc), sheet lao & cụng cho mọi boss.
+- **0.5.3** – Khung chơi tự giãn theo màn hình dài (điện thoại 20:9 không còn viền đen 2 bên), HUD né tai thỏ và nút "Vinh Làm Game", nút cảm ứng gọn hơn, boss lùi vào khi chơi cảm ứng. Prompt v9: ngôn ngữ thiết kế quái (mọi quái có ống pháo) + boss cửa 1–6.
 - **0.5.2** – Súng 3 cấp (nhặt xu lên cấp, trúng đòn tụt cấp), đạn to có vệt sáng, quái bị đẩy lùi khi trúng; máu quái tăng (bọ 45, đại bàng 140, đá 260), boss 30.000. Ảnh lỗi/thiếu không còn được vẽ ra màn hình và được báo trong Console.
 - **0.5.1** – Boss chốt kiểu thùng gỗ: ảnh bị hạ & ngộp bọt mới; boss có hoạt cảnh đau khi vỡ giáp/chuyển giai đoạn và CHOÁNG 1,4s sau Siêu phun. Ảnh boss nằm ở thư mục `Boss/` cạnh `Phun hóa chất/`; khi có `Boss1 Barrel Idle Attack 4x2.png` chạy lại build_assets là boss đổi dáng hoàn toàn. Prompt v8: gói hoạt cảnh G–K.
 - **0.5.0** – Chiêu phun đổi thành bọt trắng phun bằng miệng (ảnh thật), vết bọt bám/đọng lâu, boss ngộp bọt, logo mới ở menu.

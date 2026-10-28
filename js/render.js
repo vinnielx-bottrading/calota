@@ -18,11 +18,11 @@
     const b = (g.gate || C.GATES[0]).bg;
     const sky = ctx.createLinearGradient(0, 0, 0, C.H); sky.addColorStop(0, b.sky[0]); sky.addColorStop(1, b.sky[1]);
     ctx.fillStyle = sky; ctx.fillRect(0, 0, C.W, C.H);
-    tile(ctx, C.img.bg_far, t * b.farSpeed, 0, 1280, 720);
-    tile(ctx, C.img.bg_mid, t * b.midSpeed, 90, 1280, 720);
+    tile(ctx, C.img[b.far], t * b.farSpeed, 0, 1280, 720);
+    tile(ctx, C.img[b.mid], t * b.midSpeed, 90, 1280, 720);
   };
   C.drawForeground = function (ctx, t) {
-    const b = (g.gate || C.GATES[0]).bg, im = C.img.bg_fg; if (!im || !im.naturalWidth) return;
+    const b = (g.gate || C.GATES[0]).bg, im = C.img[b.fg]; if (!im || !im.naturalWidth) return;
     const ih = im.naturalHeight;
     ctx.globalAlpha = 0.95;
     tile(ctx, im, t * b.fgSpeed, -70, 1280, 300, 0, ih * 0.42);           // tán lá phía trên
@@ -58,6 +58,7 @@
     C.drawParticles(ctx, 1);
     E.drawBullets(ctx, g);
     C.Chem.drawJet(ctx);
+    C.Rage.drawOverlay(ctx, g); C.Rage.drawBehind(ctx, g);
     E.drawPlayer(ctx, g);
     C.drawParticles(ctx, 2);
     C.drawForeground(ctx, t);
@@ -92,6 +93,19 @@
   }
   function drawHUD(ctx) {
     const p = g.player, now = performance.now() / 1000;
+    // khối HUD trái: né tai thỏ và nút quay về "Vinh Làm Game" (nếu có phủ góc trên-trái)
+    if (!C._hubT || now - C._hubT > 2) {
+      C._hubT = now; const r = C.cv.getBoundingClientRect(); let hub = false;
+      try {
+        for (const [px, py] of [[24, 20], [60, 28], [120, 28], [40, 50]]) {
+          const el = document.elementFromPoint(r.left + px, r.top + py);
+          if (el && el !== C.cv && el !== document.body && el !== document.documentElement && !el.closest('#touchUI') && !el.closest('.panel') && el.id !== 'safeProbe') { hub = true; break; }
+        }
+      } catch (e) { }
+      C._hubY = hub ? 62 : 0;
+    }
+    const hx = (C.safe ? C.safe.l : 0), hy = C._hubY || 0;
+    ctx.save(); ctx.translate(hx, hy);
     // chân dung
     ctx.save(); ctx.beginPath(); ctx.arc(62, 62, 44, 0, 7); ctx.fillStyle = '#ffd36b'; ctx.fill(); ctx.clip();
     C.spr(ctx, 'calota_portrait', 0, 64, 70, 104); ctx.restore();
@@ -122,9 +136,18 @@
     }
     txt(ctx, 'HÓA CHẤT', bx + 8, by + bh / 2 + 1, 15, '#fff', 'left', '#0b3a5a');
     if (full && !g.ultActive) txt(ctx, C.input.usingTouch ? 'SIÊU PHUN SẴN SÀNG!' : 'SIÊU PHUN SẴN SÀNG · [K]', bx, by + bh + 20, 17, '#ffffff', 'left', '#0b3a5a');
+    // thanh NỘ — chiêu Tuyệt Mệnh
+    const rk = (g.rage || 0) / 100, ry = 124, rfull = rk >= 1 && !g.rageActive;
+    rr(ctx, bx - 2, ry - 2, 200 + 4, 14, 7); ctx.fillStyle = '#2a1608'; ctx.fill();
+    if (rk > 0) { const gr2 = ctx.createLinearGradient(bx, 0, bx + 200, 0); gr2.addColorStop(0, '#ff5a2a'); gr2.addColorStop(1, '#ffe066'); rr(ctx, bx, ry, 200 * rk, 10, 5); ctx.fillStyle = gr2; ctx.fill(); }
+    if (rfull) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + 0.4 * Math.sin(now * 9); ctx.drawImage(C.G.orange, bx - 30, ry - 30, 260, 70); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+    txt(ctx, rfull ? (C.input.usingTouch ? 'TUYỆT MỆNH SẴN SÀNG!' : 'TUYỆT MỆNH SẴN SÀNG · [Q]') : 'NỘ', bx + 208, ry + 5, 14, rfull ? '#ffe066' : '#ffb08a', 'left');
+    if (rfull && (g.threat || 0) >= 3) txt(ctx, 'BỊ BAO VÂY!', bx, ry + 26, 18, '#ff6b4a', 'left');
+    ctx.restore();
     // điểm & xu
-    txt(ctx, g.score.toLocaleString('vi-VN'), C.W - 24, 36, 30, '#fff', 'right');
-    C.spr(ctx, 'item_coin', 0, C.W - 110, 74, 30); txt(ctx, '× ' + g.coins, C.W - 88, 75, 22, '#ffe066');
+    const rx = C.W - 24 - (C.safe ? C.safe.r : 0);
+    txt(ctx, g.score.toLocaleString('vi-VN'), rx, 36, 30, '#fff', 'right');
+    C.spr(ctx, 'item_coin', 0, rx - 86, 74, 30); txt(ctx, '× ' + g.coins, rx - 64, 75, 22, '#ffe066');
     // tiến trình hoặc máu boss
     const B = g.boss;
     if (!B) {

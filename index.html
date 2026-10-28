@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Calota – Phi Công Hóa Chất</title>
-<meta name="description" content="Calota – game bắn boss bay ngang: phun bọt hóa chất bằng miệng, hạ Khinh Khí Cầu Gai Rêu.">
+<meta name="description" content="Calota – game bắn boss bay ngang: phun bọt hóa chất bằng miệng, hạ boss trâu qua từng cửa.">
 <meta name="theme-color" content="#1fa85a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
@@ -21,6 +21,7 @@
 <script src="https://vinhlamgame.vercel.app/vlg.js" data-game="calota" defer></script>
 
 <canvas id="game"></canvas>
+<div id="safeProbe" style="position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"></div>
 
 <div id="loading"><img class="logoImg" src="assets/sprites/logo.webp" alt="CALOTA" onerror="this.outerHTML='<div class=logo>CALOTA</div>'"><div class="bar"><i id="loadBar"></i></div><p>Đang nạp cánh bay…</p></div>
 
@@ -29,6 +30,7 @@
   <button id="btnPause" class="tbtn small" aria-label="Tạm dừng">❚❚</button>
   <button id="btnDash" class="tbtn dash">LƯỚT</button>
   <button id="btnUlt" class="tbtn ult">SIÊU<br>PHUN</button>
+  <button id="btnRage" class="tbtn rage">TUYỆT<br>MỆNH</button>
   <button id="btnSpray" class="tbtn spray">PHUN</button>
   <div class="moveHint">Kéo ở đây để bay</div>
 </div>
@@ -38,10 +40,7 @@
   <div class="menuBox">
     <h1 class="logoImg"><img src="assets/sprites/logo.webp" alt="CALOTA"></h1>
     <p class="tag">Phi công hạt đậu · Phun bọt hóa chất · Hạ boss trâu</p>
-    <div class="gateCard">
-      <img src="assets/ui/g1_thumb.webp" alt="">
-      <div><b>CỬA 1</b><span>Rừng Đá Đảo Trời</span><small>Boss: Khinh Khí Cầu Gai Rêu</small></div>
-    </div>
+    <div id="gateList" class="gateList"></div>
     <button id="btnPlay" class="big">▶ BẮT ĐẦU</button>
     <div class="row">
       <button id="btnHow">Hướng dẫn</button>
@@ -61,6 +60,7 @@
       <li><b>Bắn:</b> tự động.</li>
       <li><b>PHUN HÓA CHẤT:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN — Calota phồng má phun luồng bọt trắng bằng miệng. Tốn thanh hóa chất, dìm quái trong bọt, nuốt chửng đạn gai và làm boss <b>Ngộp bọt</b> (mỗi tầng +8% sát thương, tối đa ×10). Bọt bám lại trên boss, cột đá và đọng vũng dưới đất vài giây.</li>
       <li><b>SIÊU PHUN:</b> thanh đầy → <kbd>K</kbd> hoặc nút SIÊU PHUN. Sóng bọt khổng lồ phủ kín màn hình, bất tử, quét sạch quái nhỏ.</li>
+      <li><b>TUYỆT MỆNH:</b> thanh Nộ đầy (nạp rất nhanh khi bị quái/đạn vây quanh hoặc trúng đòn) → <kbd>Q</kbd> hoặc nút TUYỆT MỆNH. Calota đứng lại gồng aura, ngửa mặt phun cột bọt lên trời, bọt đổ mưa khắp màn hình: quét sạch quái, xóa đạn, boss mất máu lớn và choáng 2,5 giây. Bất tử suốt chiêu.</li>
       <li><b>Lướt:</b> <kbd>Shift</kbd>/<kbd>L</kbd> — né đạn trong chớp mắt.</li>
       <li><b>Giáp rêu</b> của boss gần như miễn đạn thường — phải dùng hóa chất đốt.</li>
       <li>Nạp hóa chất: nhặt ⚡, bắn trúng, hạ quái.</li>
@@ -81,11 +81,11 @@
   <div class="box center">
     <img class="winImg" src="assets/sprites/calota_win.webp" alt="">
     <h2 class="gold">CHIẾN THẮNG!</h2>
-    <p>Khinh Khí Cầu Gai Rêu đã tan xác.</p>
+    <p id="winText">Khinh Khí Cầu Gai Rêu đã tan xác.</p>
     <div id="winStats" class="stats"></div>
     <p id="winBest" class="best"></p>
-    <p class="soon">Cửa 2 sắp ra mắt…</p>
-    <div class="row"><button id="btnAgain" class="big">Chơi lại</button><button id="btnMenu1">Menu</button><button id="btnDonate2">Ủng hộ</button></div>
+    <p id="winSoon" class="soon">Cửa tiếp theo sắp ra mắt…</p>
+    <div class="row"><button id="btnNext" class="big">Cửa tiếp theo ▶</button><button id="btnAgain">Chơi lại</button><button id="btnMenu1">Menu</button><button id="btnDonate2">Ủng hộ</button></div>
   </div>
 </section>
 
@@ -130,7 +130,10 @@
 <script src="js/audio.js"></script>
 <script src="js/fx.js"></script>
 <script src="js/entities.js"></script>
+<script src="js/gates/waves.js"></script>
 <script src="js/gates/gate01.js"></script>
+<script src="js/gates/gate02.js"></script>
+<script src="js/rage.js"></script>
 <script src="js/game.js"></script>
 <script src="js/render.js"></script>
 <script src="js/lib-qrcode.js"></script>

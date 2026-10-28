@@ -18,7 +18,13 @@ canvas#game { display: block; background: #123; }
 #pause, #win, #lose, #how, #install, #donate { background: rgba(5, 20, 12, .62); }
 .menuBox { text-align: center; display: grid; gap: 12px; justify-items: center; margin-left: 38vw; }
 .tag { margin: 0; font-weight: 600; text-shadow: 0 2px 0 var(--ink); }
-.gateCard { display: flex; gap: 12px; align-items: center; background: rgba(42,22,8,.78); border: 3px solid #ffd34d; border-radius: 16px; padding: 8px 14px 8px 8px; text-align: left; }
+.gateList { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.gateCard { display: flex; gap: 12px; align-items: center; background: rgba(42,22,8,.78); border: 3px solid rgba(255,211,77,.35); border-radius: 16px; padding: 8px 14px 8px 8px; text-align: left; color: #fff; font: inherit; cursor: pointer; min-width: 0; opacity: .8; transition: transform .15s, opacity .15s; }
+.gateCard.sel { border-color: #ffd34d; opacity: 1; transform: scale(1.04); box-shadow: 0 0 18px rgba(255,211,77,.45); }
+.gateCard.locked { filter: grayscale(.85) brightness(.7); cursor: not-allowed; }
+.gateCard.shake { animation: gshake .35s; }
+@keyframes gshake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.gateCard .gb { display: block; color: #ffd34d; opacity: 1; }
 .gateCard img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; }
 .gateCard b { display: block; color: #ffd34d; font-size: 18px; }
 .gateCard span { display: block; font-size: 20px; font-weight: 800; }
@@ -47,11 +53,12 @@ kbd { background: #fff3; border-radius: 5px; padding: 0 6px; font-family: inheri
 body.touch.playing #touchUI { display: block; }
 .tbtn { position: absolute; pointer-events: auto; border-radius: 50%; padding: 0; font-size: 16px; line-height: 1.05; opacity: .88; touch-action: none; }
 .tbtn.down { transform: scale(.92); opacity: 1; }
-.tbtn.spray { right: calc(24px + env(safe-area-inset-right)); bottom: 28px; width: 112px; height: 112px; font-size: 22px; background: radial-gradient(circle at 40% 35%, #eaff7a, #3ccf5a); }
-.tbtn.ult { right: calc(148px + env(safe-area-inset-right)); bottom: 40px; width: 80px; height: 80px; background: radial-gradient(circle at 40% 35%, #fff, #b6ff3a); }
-.tbtn.dash { right: calc(42px + env(safe-area-inset-right)); bottom: 158px; width: 72px; height: 72px; background: radial-gradient(circle at 40% 35%, #fff, #7fd8ff); }
-.tbtn.small { right: calc(16px + env(safe-area-inset-right)); top: 96px; width: 46px; height: 46px; font-size: 14px; border-radius: 12px; }
-.moveHint { position: absolute; left: 6vw; bottom: 22px; font-weight: 800; opacity: .45; text-shadow: 0 2px 0 #000; }
+.tbtn.spray { right: calc(14px + env(safe-area-inset-right)); bottom: 14px; width: 96px; height: 96px; font-size: 19px; background: radial-gradient(circle at 40% 35%, #ffffff, #7fd0ff); }
+.tbtn.ult { right: calc(118px + env(safe-area-inset-right)); bottom: 14px; width: 70px; height: 70px; font-size: 13px; background: radial-gradient(circle at 40% 35%, #fff, #ffe066); }
+.tbtn.dash { right: calc(26px + env(safe-area-inset-right)); bottom: 122px; width: 62px; height: 62px; font-size: 13px; background: radial-gradient(circle at 40% 35%, #fff, #b8f0c8); }
+.tbtn.small { right: calc(12px + env(safe-area-inset-right)); top: 96px; width: 42px; height: 42px; font-size: 13px; border-radius: 12px; }
+.tbtn { opacity: .68; }
+.moveHint { position: absolute; left: calc(6vw + env(safe-area-inset-left)); bottom: 22px; font-weight: 800; opacity: .45; text-shadow: 0 2px 0 #000; }
 #btnPause { display: block; }
 body:not(.touch).playing #touchUI { display: block; }
 body:not(.touch) #touchUI .tbtn:not(.small), body:not(.touch) .moveHint { display: none; }
@@ -64,7 +71,7 @@ body.portrait #rotate { display: grid; }
 @media (max-height: 500px) {
   .menuBox { margin-left: 30vw; gap: 6px; }
   .logo { font-size: 56px; }
-  .gateCard img { width: 54px; height: 54px; }
+  .gateCard img { width: 54px; height: 54px; } .gateCard span { font-size: 16px; } .gateCard { padding: 6px 10px 6px 6px; }
   .box { padding: 12px 16px; } .box h2 { font-size: 24px; }
   button.big { font-size: 20px; padding: 6px 22px; }
 }
@@ -93,3 +100,7 @@ body.portrait #rotate { display: grid; }
 .logoImg img, img.logoImg { width: min(46vw, 560px); filter: drop-shadow(0 6px 0 rgba(42,22,8,.6)); }
 #loading img.logoImg { width: min(70vw, 520px); }
 @media (max-height: 500px) { .logoImg img { width: min(40vw, 360px); } }
+
+.tbtn.rage { right: calc(196px + env(safe-area-inset-right)); bottom: 14px; width: 70px; height: 70px; font-size: 12px; background: radial-gradient(circle at 40% 35%, #fff3c0, #ff7a3a); opacity: .35; }
+.tbtn.rage.ready { opacity: .95; animation: ragePulse .6s infinite alternate; }
+@keyframes ragePulse { to { transform: scale(1.1); box-shadow: 0 0 22px #ffb84a, 0 4px 0 var(--ink); } }

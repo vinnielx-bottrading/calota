@@ -2,19 +2,20 @@
 (function (C) {
   const I = C.input = {
     keys: {}, moveX: 0, moveY: 0,
-    spray: false, ultPressed: false, dashPressed: false, pausePressed: false,
+    spray: false, ultPressed: false, ragePressed: false, dashPressed: false, pausePressed: false,
     touch: { id: null, lastX: 0, lastY: 0, dx: 0, dy: 0, active: false },
     usingTouch: false
   };
   const K = {
     left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'],
-    spray: ['Space', 'KeyJ'], ult: ['KeyK', 'KeyE'], dash: ['ShiftLeft', 'ShiftRight', 'KeyL'], pause: ['KeyP', 'Escape']
+    spray: ['Space', 'KeyJ'], ult: ['KeyK', 'KeyE'], rage: ['KeyQ', 'KeyU'], dash: ['ShiftLeft', 'ShiftRight', 'KeyL'], pause: ['KeyP', 'Escape']
   };
   const has = (arr) => arr.some(k => I.keys[k]);
   window.addEventListener('keydown', e => {
     if (e.repeat) { if (K.spray.includes(e.code) || e.code.startsWith('Arrow')) e.preventDefault(); return; }
     I.keys[e.code] = true;
     if (K.ult.includes(e.code)) I.ultPressed = true;
+    if (K.rage.includes(e.code)) I.ragePressed = true;
     if (K.dash.includes(e.code)) I.dashPressed = true;
     if (K.pause.includes(e.code)) I.pausePressed = true;
     if (K.spray.includes(e.code) || e.code.startsWith('Arrow')) e.preventDefault();
@@ -58,6 +59,7 @@
     };
     hold('btnSpray', () => I.sprayBtn = true, () => I.sprayBtn = false);
     hold('btnUlt', () => I.ultPressed = true);
+    hold('btnRage', () => I.ragePressed = true);
     hold('btnDash', () => I.dashPressed = true);
   };
 
@@ -70,5 +72,5 @@
     I.spray = has(K.spray) || !!I.sprayBtn;
   };
   I.consumeTouchDelta = function () { const d = { x: I.touch.dx, y: I.touch.dy }; I.touch.dx = I.touch.dy = 0; return d; };
-  I.endFrame = function () { I.ultPressed = I.dashPressed = I.pausePressed = false; };
+  I.endFrame = function () { I.ultPressed = I.ragePressed = I.dashPressed = I.pausePressed = false; };
 })(window.C);

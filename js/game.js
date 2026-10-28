@@ -12,9 +12,9 @@
   };
 
   g.start = function (gateIdx, fromBoss) {
-    g.gate = C.GATES[gateIdx || 0];
+    g.gateIdx = gateIdx || 0; g.gate = C.GATES[g.gateIdx]; C.skin = g.gate.skin || {};
     g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null;
-    C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0;
+    C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0; C.Rage.reset(g); if (fromBoss) g.rage = 50;
     g.gauge = fromBoss ? 60 : 20; g.score = fromBoss ? g.checkpointScore || 0 : 0; g.coins = fromBoss ? g.checkpointCoins || 0 : 0; g.kills = 0;
     g.gunLv = fromBoss ? g.checkpointGun || 2 : 1; g.gunXP = 0;
     g.ultActive = false; g.ultT = 0; g.cutin = 0; C.Chem.power = 0; C.Chem.ult = false;
@@ -38,8 +38,8 @@
     setTimeout(() => {
       if (g.state !== 'play') return;
       g.state = 'win'; C.sfx.play('win'); C.sfx.hiss(0); C.Chem.power = 0; C.Chem.active = false;
-      const best = C.store.get('best1', 0); if (g.score > best) C.store.set('best1', g.score);
-      C.store.set('clear1', true);
+      const id = g.gate.id, best = C.store.get('best' + id, 0); if (g.score > best) C.store.set('best' + id, g.score);
+      C.store.set('clear' + id, true);
       C.ui.showWin({ score: g.score, coins: g.coins, bossTime: g.bossT, hp: g.player.hp, best: Math.max(best, g.score) });
     }, 1600);
   };
@@ -61,6 +61,8 @@
   };
 
   function killEnemy(e, bySpray) {
+    if (e.dead) return;
+    C.Rage.add(g, 2);
     e.dead = 'killed'; g.kills++; g.score += e.score || 100; g.addGauge(6);
     if (bySpray) { // tan chảy trong hóa chất
       // chìm ngộp trong bọt: tóe lớn + vài mảng bọt rơi xuống đọng lại
@@ -74,6 +76,7 @@
     if (r < 0.28) E.drop(g, 'coin', e.x, e.y); else if (r < 0.34) E.drop(g, 'bolt', e.x, e.y);
   }
 
+  g.killEnemy = killEnemy;
   // --------------------- áp dụng luồng phun ---------------------
   function applySpray(dt) {
     const Ch = C.Chem; if (!Ch.active || Ch.power < 0.3) { Ch.hitDist = null; Ch.hitPoint = null; return; }
@@ -134,6 +137,7 @@
     // thời gian: chậm khi cut-in / boss nổ
     let dt = rdt;
     if (g.cutin > 0) { g.cutin -= rdt; dt = rdt * 0.04; if (g.cutin <= 0) { C.flash(0.9, '#ffffff'); C.shake(26); spawnShockwave(); for (let i = 0; i < 4; i++) setTimeout(() => C.Decals.splatScreen(), 250 + i * 450); } }
+    else if (g.rageActive && g.ragePhase === 'charge') dt = rdt * 0.2;   // gồng: thế giới gần như đứng lại
     else if (C.cam.slow > 0) { C.cam.slow -= rdt; dt = rdt * 0.35; }
     g.t += dt; if (g.boss) g.bossT += dt;
     while (g.evI < g.events.length && g.events[g.evI].t <= g.t) g.events[g.evI++].f(g);
@@ -141,9 +145,10 @@
 
     const p = g.player;
     E.updatePlayer(g, dt);
+    C.Rage.update(g, dt, rdt);   // CHIÊU TUYỆT MỆNH
 
     // ---- Siêu phun ----
-    if (I.ultPressed && g.gauge >= 100 && !g.ultActive && !p.dead) {
+    if (I.ultPressed && g.gauge >= 100 && !g.ultActive && !g.rageActive && !p.dead) {
       g.ultActive = true; g.ultT = 2.8; g.cutin = 0.95; C.sfx.play('ult'); C.flash(0.5, '#dff3ff');
       g.ebullets.forEach(b => b.vx *= 0.3);
     }
@@ -151,7 +156,7 @@
     if (g.ultActive && g.cutin <= 0) {
       g.ultT -= dt; g.gauge = Math.max(0, 100 * g.ultT / 2.8); C.shake(7);
       if (g.ultT <= 0) { g.ultActive = false; g.gauge = 0; if (g.boss && g.boss.state === 'fight') { g.boss.stunT = 1.4; g.banner('BOSS CHOÁNG!', 1.2, 'boss'); } }
-    } else if (!g.ultActive && I.spray && g.gauge > 0 && !p.dead) {
+    } else if (!g.ultActive && !g.rageActive && I.spray && g.gauge > 0 && !p.dead) {
       sprayOn = true; g.gauge = Math.max(0, g.gauge - GAUGE_DRAIN * dt);
     }
     const n = E.nozzle(p);
@@ -187,9 +192,11 @@
 
     // ---- đạn boss ----
     for (const b of g.ebullets) {
+      if (b.grav) b.vy += b.grav * dt;
       b.x += b.vx * dt; b.y += b.vy * dt; b.rot += b.vr * dt;
-      if (b.x < -60 || b.x > C.W + 80 || b.y < -60 || b.y > C.H + 60) b.dead = true;
-      else if (!p.dead && C.dist2(b.x, b.y, p.x, p.y) < (b.r * 0.8 + p.r) * (b.r * 0.8 + p.r)) { if (E.hurtPlayer(g, 1)) { b.dead = true; C.explode(b.x, b.y, 110); } }
+      if (b.grav && b.y > C.H - 50) { b.dead = true; C.emit({ kind: 'img', img: 'g2_venom_puddle', x: b.x, y: C.H - 40 + C.rand(-6, 6), vx: -250, max: 2.2, s0: 70, s1: 110, layer: 1 }); }
+      else if (b.x < -60 || b.x > C.W + 80 || b.y < -60 || b.y > C.H + 60) b.dead = true;
+      else if (!p.dead && C.dist2(b.x, b.y, p.x, p.y) < (b.r * 0.8 + p.r) * (b.r * 0.8 + p.r)) { if (E.hurtPlayer(g, 1)) { b.dead = true; if (b.kind === 'venom' || b.kind === 'glob') C.emit({ kind: 'img', img: 'g2_venom_splash', x: b.x, y: b.y, max: 0.4, s0: 90, s1: 170, layer: 2 }); else C.explode(b.x, b.y, 110); } }
     }
     g.ebullets = g.ebullets.filter(b => !b.dead);
 

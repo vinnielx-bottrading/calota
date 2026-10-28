@@ -2,7 +2,8 @@
 window.C = window.C || {};
 (function (C) {
   C.W = 1280; C.H = 720;
-  C.VERSION = '0.5.2';
+  C.VERSION = '0.8.0';
+  C.skin = {}; // đổi tên sprite theo cửa (vd. beetle → g2_mosq)
 
   // ---------- tiện ích ----------
   C.rand = (a, b) => a + Math.random() * (b - a);
@@ -23,7 +24,12 @@ window.C = window.C || {};
     C.view = { s: 1, ox: 0, oy: 0 };
     const fit = () => {
       const w = window.innerWidth, h = window.innerHeight;
+      // màn hình dài (điện thoại 19.5:9, 20:9…) → mở rộng khung chơi theo chiều ngang, không còn viền đen
+      C.W = Math.round(C.clamp(C.H * w / h, 1280, 1760));
       const s = Math.min(w / C.W, h / C.H);
+      // vùng an toàn (tai thỏ / thanh hệ thống) đổi sang đơn vị logic
+      const pr = document.getElementById('safeProbe');
+      if (pr) { const cs = getComputedStyle(pr); C.safe = { l: parseFloat(cs.paddingLeft) / s || 0, r: parseFloat(cs.paddingRight) / s || 0, t: parseFloat(cs.paddingTop) / s || 0 }; }
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       cv.style.width = Math.round(C.W * s) + 'px';
       cv.style.height = Math.round(C.H * s) + 'px';
@@ -55,11 +61,13 @@ window.C = window.C || {};
     const m = {};
     for (const k in C.SPRITES) m[k] = C.SPRITES[k].file;
     m.bg_far = 'assets/bg/g1_far.webp'; m.bg_mid = 'assets/bg/g1_mid.webp'; m.bg_fg = 'assets/bg/g1_fg.webp';
+    for (const n of [2]) for (const l of ['far', 'mid', 'fg']) m[`g${n}_${l}`] = `assets/bg/g${n}_${l}.webp`;
     return m;
   };
 
   /** Vẽ frame `f` của sprite `name`, tâm tại (x,y). w = chiều rộng hiển thị. */
   C.spr = function (ctx, name, f, x, y, w, o) {
+    name = C.skin[name] || name;
     const m = C.SPRITES[name], im = C.img[name];
     if (!m || !im || !im.complete || !im.naturalWidth) return; // ảnh lỗi/thiếu → bỏ qua, không vẽ khung lỗi
     f = ((f | 0) % m.n + m.n) % m.n;
@@ -69,11 +77,12 @@ window.C = window.C || {};
     ctx.drawImage(im, f * m.fw, 0, m.fw, m.fh, -dw / 2, -dh / 2, dw, dh);
     ctx.restore();
   };
-  C.sprH = (name, w) => { const m = C.SPRITES[name]; return m ? m.fh * w / m.fw : w; };
+  C.sprH = (name, w) => { const m = C.SPRITES[C.skin[name] || name]; return m ? m.fh * w / m.fw : w; };
 
   /** Bộ đệm để tô màu sprite (ăn mòn, nháy trắng) không cần đọc pixel. */
   const tintCv = document.createElement('canvas'), tctx = tintCv.getContext('2d');
   C.sprTint = function (ctx, name, f, x, y, w, color, amount, o) {
+    name = C.skin[name] || name;
     const m = C.SPRITES[name], im = C.img[name];
     if (!m || !im || !im.complete || !im.naturalWidth) return;
     f = ((f | 0) % m.n + m.n) % m.n;
