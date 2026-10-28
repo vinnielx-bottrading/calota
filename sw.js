@@ -1,5 +1,5 @@
 /* Calota service worker — network-first: luôn lấy bản mới khi có mạng, tự cập nhật âm thầm */
-const CACHE = 'calota-v0.4.0';
+const CACHE = 'calota-v0.4.1';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));

@@ -93,7 +93,7 @@
   <div class="box center">
     <h2 class="red">CALOTA BỊ HẠ!</h2>
     <p id="loseInfo"></p>
-    <div class="row"><button id="btnRetryBoss" class="big">Đánh lại Boss</button><button id="btnRetry">Chơi lại từ đầu</button><button id="btnMenu2">Menu</button></div>
+    <div class="row"><button id="btnRetryBoss" class="big">Đánh lại Boss</button><button id="btnRetry">Chơi lại từ đầu</button><button id="btnMenu2">Menu</button><button id="btnDonate3">Ủng hộ</button></div>
   </div>
 </section>
 
@@ -111,11 +111,14 @@
 </section>
 
 <section id="donate" class="panel">
-  <div class="box center">
+  <div class="box center donateBox">
     <h2>Ủng hộ Vinh làm game</h2>
-    <p>Mỗi ly cà phê giúp Calota có thêm cửa mới ☕</p>
-    <img class="qr" src="assets/ui/donate-qr.png" alt="Mã QR ủng hộ" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'note',textContent:'(Thêm ảnh QR vào assets/ui/donate-qr.png)'}))">
-    <button data-back="menu">Đóng</button>
+    <p id="donateMsg"></p>
+    <div id="amts" class="amts"></div>
+    <div class="qrWrap"><canvas id="qrCanvas" width="240" height="240"></canvas><b id="qrAmount"></b></div>
+    <p class="note">Mở app ngân hàng → Quét QR → số tiền đã điền sẵn.</p>
+    <p id="qrBank" class="bankLine"></p>
+    <div class="row"><button id="btnCopyAcc">Chép số tài khoản</button><button id="btnDonateClose" class="big">Để sau</button></div>
   </div>
 </section>
 
@@ -130,6 +133,8 @@
 <script src="js/gates/gate01.js"></script>
 <script src="js/game.js"></script>
 <script src="js/render.js"></script>
+<script src="js/lib-qrcode.js"></script>
+<script src="js/donate.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

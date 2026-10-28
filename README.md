@@ -1,11 +1,32 @@
-# CALOTA – Phi Công Hóa Chất · v0.4.0
+# CALOTA – Phi Công Hóa Chất · v0.4.1
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
 
 ## Chơi thử
 - Mở `index.html` trực tiếp trong trình duyệt là chạy (không cần server).
-- Deploy: đẩy cả thư mục lên GitHub → import vào Vercel (static, không cần build).
+
+## Deploy lên Vercel
+**Cách 1 – qua GitHub (khuyên dùng, tự deploy mỗi lần push):**
+1. Tạo repo mới trên GitHub, ví dụ `calota`.
+2. Đẩy **nội dung bên trong** thư mục `calota-game` lên (để `index.html` nằm ở gốc repo):
+   ```
+   cd calota-game
+   git init && git add . && git commit -m "Calota v0.4.1"
+   git branch -M main
+   git remote add origin https://github.com/<tài-khoản>/calota.git
+   git push -u origin main
+   ```
+   (hoặc kéo-thả file trên giao diện web GitHub → *Add file → Upload files*).
+3. vercel.com → **Add New… → Project** → chọn repo `calota` → **Import**.
+4. Framework Preset: **Other**. Build Command và Output Directory: để trống. Root Directory: `./`. Bấm **Deploy**.
+5. Đổi tên miền: Project → Settings → Domains → ví dụ `calota.vercel.app`.
+6. Từ giờ mỗi lần `git push`, Vercel tự deploy; người chơi tự nhận bản mới.
+
+**Cách 2 – Vercel CLI:** trong thư mục `calota-game` chạy `npx vercel` (lần đầu đăng nhập, chọn mặc định), rồi `npx vercel --prod`.
+
+`vercel.json` đã cấu hình: `sw.js` và code không cache (để tự cập nhật), ảnh cache 7 ngày.
+Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 - Đường tắt kiểm thử: `index.html?boss` (vào thẳng boss), `index.html?ult` (thanh hóa chất đầy).
 
 ## Điều khiển
@@ -47,12 +68,16 @@ js/gates/gate01.js    kịch bản Cửa 1 + boss Khinh Khí Cầu Gai Rêu
 js/game.js            vòng lặp, va chạm, phun, Siêu phun
 js/render.js          vẽ cảnh, HUD, cut-in
 js/main.js            menu, thắng/thua, PWA, khởi động
+js/donate.js          bảng Ủng hộ + tạo mã VietQR
+js/lib-qrcode.js      thư viện vẽ QR (qrcode-generator, MIT)
 assets/sprites/*.webp mỗi animation 1 dải ngang; thông số trong assets/sprites.js
 assets/bg/            nền xa / giữa / gần của Cửa 1
-assets/ui/            thumbnail cửa, (donate-qr.png – bạn tự thêm)
+assets/ui/            thumbnail cửa
 icons/                icon app 192/512/maskable/apple/favicon
 docs/CALOTA_PROMPTS.html  prompt tạo asset (bấm Copy)
 tools/build_assets.py     cắt sprite sheet → assets (Python + Pillow + SciPy)
+tools/marketing_crop.py   cắt ảnh marketing đúng kích thước
+vercel.json               cấu hình cache khi deploy
 sw.js, manifest.webmanifest  PWA
 ```
 
@@ -62,8 +87,16 @@ sw.js, manifest.webmanifest  PWA
    `python tools/build_assets.py "<thư mục ảnh gốc>" "<thư mục Điều chỉnh>" .`
 3. Tạo `js/gates/gate02.js` theo mẫu `gate01.js` (`timeline()` + `makeBoss()`), thêm `<script>` vào `index.html`.
 
+## Ủng hộ
+- Bảng Ủng hộ tự hiện **1 lần khi mở game** (mỗi phiên), **sau khi thắng cửa**, và **1 lần/phiên khi thua**; luôn có nút Ủng hộ ở menu, màn thắng, màn thua.
+- Chọn **50k / 100k / 200k / 1 triệu / Tùy ý** → mã VietQR (Vietcombank 0111000182684 – NGUYEN HOANG VINH) được tạo ngay trong máy với số tiền + nội dung "Ung ho Calota" điền sẵn. Không cần mạng. Đã kiểm: mã tĩnh tạo ra trùng khớp từng ký tự với QR gốc của ngân hàng.
+- Đổi tài khoản/nội dung: sửa đầu file `js/donate.js`.
+
+## Ảnh marketing
+Prompt ở `docs/CALOTA_PROMPTS.html` phần F (KV 2100×800 có chữ + sạch, thumbnail 1200×900, 7 slide 1920×1080).
+Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|thumb [ảnh ra] [--top|--bottom]`.
+
 ## Việc còn lại
-- **Ủng hộ:** chép ảnh QR ngân hàng vào `assets/ui/donate-qr.png`.
 - Boss bị hạ dùng sheet có dáng hơi khác bản idle – có thể gen lại cho khớp (xem prompt D7b).
 - Tùy chọn: thay hiệu ứng phun vẽ bằng code bằng ảnh (prompt E1–E3), thêm logo (E4).
 
@@ -71,4 +104,5 @@ sw.js, manifest.webmanifest  PWA
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.4.1** – Bảng Ủng hộ VietQR có chọn số tiền; vercel.json; prompt ảnh marketing + công cụ cắt ảnh.
 - **0.4.0** – Dựng Cửa 1 chơi được: chiêu phun hóa chất + Siêu phun, boss 3 giai đoạn có giáp rêu, PWA, điều khiển cảm ứng.

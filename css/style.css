@@ -68,3 +68,23 @@ body.portrait #rotate { display: grid; }
   .box { padding: 12px 16px; } .box h2 { font-size: 24px; }
   button.big { font-size: 20px; padding: 6px 22px; }
 }
+
+/* ủng hộ */
+.donateBox { max-width: 460px; }
+.donateBox h2 { color: #ffd34d; }
+.amts { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 6px 0 10px; }
+.amt { padding: 6px 12px; font-size: 16px; }
+.amt.sel { background: linear-gradient(#d9ff6a, #6fe04a); transform: translateY(2px); box-shadow: 0 2px 0 var(--ink); }
+.qrWrap { display: inline-grid; justify-items: center; gap: 4px; background: #fff; border-radius: 16px; padding: 10px 10px 8px; border: 3px solid #1fa85a; }
+.qrWrap canvas { width: 210px; height: 210px; image-rendering: pixelated; }
+.qrWrap b { color: #0b4a24; font-size: 20px; }
+.bankLine { font-weight: 800; color: #ffe066; margin: 4px 0 10px; }
+@media (max-height: 500px) {
+  .donateBox { max-width: 720px; display: grid; grid-template-columns: auto 1fr; gap: 0 14px; text-align: left; align-items: center; }
+  .donateBox h2, .donateBox #donateMsg { grid-column: 1 / -1; text-align: center; margin: 0 0 4px; }
+  .donateBox .qrWrap { grid-row: 3 / span 4; }
+  .qrWrap canvas { width: 150px; height: 150px; }
+  .donateBox .amts { justify-content: flex-start; margin: 0; }
+  .donateBox .row { justify-content: flex-start; }
+  .donateBox .note, .bankLine { margin: 4px 0; }
+}
