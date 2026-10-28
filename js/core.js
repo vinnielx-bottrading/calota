@@ -2,7 +2,7 @@
 window.C = window.C || {};
 (function (C) {
   C.W = 1280; C.H = 720;
-  C.VERSION = '0.4.1';
+  C.VERSION = '0.5.1';
 
   // ---------- tiện ích ----------
   C.rand = (a, b) => a + Math.random() * (b - a);

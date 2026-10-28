@@ -14,7 +14,7 @@
   g.start = function (gateIdx, fromBoss) {
     g.gate = C.GATES[gateIdx || 0];
     g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null;
-    C.particles.length = 0; g.banners = [];
+    C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0;
     g.gauge = fromBoss ? 60 : 20; g.score = fromBoss ? g.checkpointScore || 0 : 0; g.coins = fromBoss ? g.checkpointCoins || 0 : 0; g.kills = 0;
     g.ultActive = false; g.ultT = 0; g.cutin = 0; C.Chem.power = 0; C.Chem.ult = false;
     g.events = g.gate.timeline(); g.evI = 0; g.t = 0; g.bossT = 0; g.state = 'play'; g.startedAt = performance.now();
@@ -60,9 +60,10 @@
   function killEnemy(e, bySpray) {
     e.dead = 'killed'; g.kills++; g.score += e.score || 100; g.addGauge(6);
     if (bySpray) { // tan chảy trong hóa chất
-      for (let i = 0; i < 14; i++) C.emit({ kind: 'drop', color: '#b6ff3a', x: e.x + C.rand(-20, 20), y: e.y + C.rand(-20, 20), vx: C.rand(-200, 200), vy: C.rand(-300, 50), grav: 1100, max: C.rand(0.4, 0.8), s0: C.rand(3, 6), s1: 2, add: true, layer: 2 });
-      for (let i = 0; i < 4; i++) C.emit({ kind: 'glow', img: C.G.smoke, x: e.x + C.rand(-20, 20), y: e.y, vx: C.rand(-30, 30), vy: C.rand(-120, -50), max: 1, s0: 20, s1: 70, layer: 2, a0: 0.8 });
-      C.emit({ kind: 'glow', img: C.G.lime, x: e.x, y: e.y, max: 0.3, s0: 40, s1: 120, add: true, layer: 2 });
+      // chìm ngộp trong bọt: tóe lớn + vài mảng bọt rơi xuống đọng lại
+      C.emit({ kind: 'anim', img: 'foam_splash', x: e.x, y: e.y, max: 0.5, s0: e.w * 1.3, s1: e.w * 1.7, layer: 2, fadePow: 6 });
+      for (let i = 0; i < 12; i++) C.emit({ kind: 'blob', color: '#ffffff', edge: '#6fa3c8', x: e.x + C.rand(-20, 20), y: e.y + C.rand(-20, 20), vx: C.rand(-220, 220), vy: C.rand(-320, 40), grav: 1100, max: C.rand(0.6, 1), s0: C.rand(5, 9), s1: 3, layer: 2 });
+      for (let i = 0; i < 2; i++) { const d = { x: e.x + C.rand(-20, 20), y: e.y + C.rand(-20, 20), dead: true }; C.Decals.add(null, d.x, d.y, C.randi(0, 2), C.rand(70, 110), 7); C.Decals.list[C.Decals.list.length - 1].falling = true; }
       C.sfx.play('sizzle');
     } else C.explode(e.x, e.y, e.w * 1.1);
     C.sfx.play('kill');
@@ -73,23 +74,24 @@
   // --------------------- áp dụng luồng phun ---------------------
   function applySpray(dt) {
     const Ch = C.Chem; if (!Ch.active || Ch.power < 0.3) { Ch.hitDist = null; Ch.hitPoint = null; return; }
-    const ult = g.ultActive; let nearest = Infinity, hp = null;
+    const ult = g.ultActive; let nearest = Infinity, hp = null, hitEnt = null;
     // vật cản chặn luồng (cột đá) — luồng tóe lên bề mặt
     if (!ult) for (const e of g.enemies) if (e.static) for (const [cx, cy, r] of E.circles(e)) {
-      const d = Ch.inCone(cx, cy, r * 0.7); if (d >= 0 && d < nearest) { nearest = d - r * 0.5; hp = { x: cx - r * 0.6, y: Ch.y + Math.sin(Ch.dir) * d }; }
+      const d = Ch.inCone(cx, cy, r * 0.7); if (d >= 0 && d < nearest) { nearest = d - r * 0.5; hp = { x: cx - r * 0.6, y: Ch.y + Math.sin(Ch.dir) * d }; hitEnt = e; }
     }
     for (const e of g.enemies) {
       if (e.static || e.dead) continue;
       const d = Ch.inCone(e.x, e.y, e.r); if (d < 0 || d > nearest + 40) continue;
       e.hp -= MINION_SPRAY_DPS * (ult ? 4 : 1) * dt; e.corr = Math.min(3, e.corr + dt * 4);
       C.Chem.corrode(e.x, e.y, e.w, e.w * 0.8, 0.6);
+      if (Math.random() < dt * 6) C.Decals.add(e, e.x + C.rand(-e.r, e.r * 0.3), e.y + C.rand(-e.r * 0.6, e.r * 0.6), C.randi(0, 2), C.rand(40, 70));
       if (e.hp <= 0) killEnemy(e, true);
     }
     // đạn gai của boss bị hòa tan
     for (const b of g.ebullets) {
       if (Ch.inCone(b.x, b.y, b.r) >= 0 && Ch.inCone(b.x, b.y, b.r) < nearest) {
         b.hp -= dt * (ult ? 99 : 3.5);
-        if (b.hp <= 0) { b.dead = true; C.Chem.splash(b.x, b.y, 1); C.emit({ kind: 'glow', img: C.G.smoke, x: b.x, y: b.y, vy: -80, max: 0.8, s0: 16, s1: 50, layer: 2 }); g.score += 20; }
+        if (b.hp <= 0) { b.dead = true; C.Chem.splash(b.x, b.y, 1); g.score += 20; }
       }
     }
     const B = g.boss;
@@ -98,7 +100,7 @@
         const d = Ch.inCone(cx, cy, r);
         if (d >= 0 && d < nearest) {
           const surf = Math.max(30, d - r * 0.85);
-          if (surf < nearest) { nearest = surf; hp = { x: Ch.x + Math.cos(Ch.dir) * surf, y: C.clamp(Ch.y + Math.sin(Ch.dir) * surf, cy - r, cy + r) }; }
+          if (surf < nearest) { nearest = surf; hp = { x: Ch.x + Math.cos(Ch.dir) * surf, y: C.clamp(Ch.y + Math.sin(Ch.dir) * surf, cy - r, cy + r) }; hitEnt = B; }
           const dealt = B.damage((ult ? ULT_DPS : SPRAY_DPS) * dt, ult ? 'ult' : 'spray');
           B.onSprayed(dt, ult);
           g.sprayAcc += dealt; g.score += Math.round(dealt * 0.5);
@@ -108,6 +110,13 @@
       }
     }
     Ch.hitDist = isFinite(nearest) ? nearest : null; Ch.hitPoint = hp;
+    // dán vết bọt lên chỗ trúng (bám theo boss / cột đá), lưu vài giây mới tan
+    g.decalT -= dt;
+    if (hp && hitEnt && g.decalT <= 0) {
+      g.decalT = ult ? 0.05 : 0.14;
+      const spread = ult ? 150 : 60, big = hitEnt === B ? 1.3 : 1;
+      C.Decals.add(hitEnt, hp.x + C.rand(0, ult ? 160 : 70), hp.y + C.rand(-spread, spread), C.randi(0, 3), C.rand(55, ult ? 150 : 100) * big, C.rand(5, 8));
+    }
     g.sprayAccT += dt;
     if (g.sprayAccT > 0.16) {
       if (g.sprayAcc >= 1 && hp) C.dmgText(hp.x, hp.y - 30, g.sprayAcc, ult ? '#e7ff3a' : '#9dff5a', ult ? 40 : 28);
@@ -121,7 +130,7 @@
     if (I.pausePressed) { g.pause(); return; }
     // thời gian: chậm khi cut-in / boss nổ
     let dt = rdt;
-    if (g.cutin > 0) { g.cutin -= rdt; dt = rdt * 0.04; if (g.cutin <= 0) { C.flash(0.9, '#e9ffb0'); C.shake(26); spawnShockwave(); } }
+    if (g.cutin > 0) { g.cutin -= rdt; dt = rdt * 0.04; if (g.cutin <= 0) { C.flash(0.9, '#ffffff'); C.shake(26); spawnShockwave(); for (let i = 0; i < 4; i++) setTimeout(() => C.Decals.splatScreen(), 250 + i * 450); } }
     else if (C.cam.slow > 0) { C.cam.slow -= rdt; dt = rdt * 0.35; }
     g.t += dt; if (g.boss) g.bossT += dt;
     while (g.evI < g.events.length && g.events[g.evI].t <= g.t) g.events[g.evI++].f(g);
@@ -132,13 +141,13 @@
 
     // ---- Siêu phun ----
     if (I.ultPressed && g.gauge >= 100 && !g.ultActive && !p.dead) {
-      g.ultActive = true; g.ultT = 2.8; g.cutin = 0.95; C.sfx.play('ult'); C.flash(0.5, '#b6ff3a');
+      g.ultActive = true; g.ultT = 2.8; g.cutin = 0.95; C.sfx.play('ult'); C.flash(0.5, '#dff3ff');
       g.ebullets.forEach(b => b.vx *= 0.3);
     }
     let sprayOn = false;
     if (g.ultActive && g.cutin <= 0) {
       g.ultT -= dt; g.gauge = Math.max(0, 100 * g.ultT / 2.8); C.shake(7);
-      if (g.ultT <= 0) { g.ultActive = false; g.gauge = 0; }
+      if (g.ultT <= 0) { g.ultActive = false; g.gauge = 0; if (g.boss && g.boss.state === 'fight') { g.boss.stunT = 1.4; g.banner('BOSS CHOÁNG!', 1.2, 'boss'); } }
     } else if (!g.ultActive && I.spray && g.gauge > 0 && !p.dead) {
       sprayOn = true; g.gauge = Math.max(0, g.gauge - GAUGE_DRAIN * dt);
     }
@@ -194,16 +203,16 @@
     g.enemies = g.enemies.filter(e => !e.dead);
     E.updateItems(g, dt);
     if (g.boss) g.boss.update(dt);
-    C.updateParticles(dt);
+    C.updateParticles(dt); C.Decals.update(dt, 200);
     for (const b of g.banners) b.t += rdt;
     g.banners = g.banners.filter(b => b.t < b.max);
   };
 
   function spawnShockwave() {
     const n = E.nozzle(g.player);
-    C.emit({ kind: 'ring', color: 'rgba(200,255,120,0.95)', x: n.x, y: n.y, max: 0.6, s0: 20, s1: 700, lw: 26, layer: 2, add: true });
-    C.emit({ kind: 'ring', color: 'rgba(120,255,220,0.8)', x: n.x, y: n.y, max: 0.8, s0: 10, s1: 1000, lw: 14, layer: 2, add: true });
-    for (let i = 0; i < 60; i++) { const a = C.rand(-0.7, 0.7), v = C.rand(600, 1600); C.emit({ kind: 'drop', color: '#d4ff4a', x: n.x, y: n.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 100, grav: 900, max: C.rand(0.5, 1), s0: C.rand(4, 8), s1: 2, add: true, layer: 2 }); }
+    C.emit({ kind: 'ring', color: 'rgba(255,255,255,0.95)', x: n.x, y: n.y, max: 0.6, s0: 20, s1: 700, lw: 26, layer: 2 });
+    C.emit({ kind: 'ring', color: 'rgba(150,210,255,0.8)', x: n.x, y: n.y, max: 0.8, s0: 10, s1: 1000, lw: 14, layer: 2 });
+    for (let i = 0; i < 60; i++) { const a = C.rand(-0.7, 0.7), v = C.rand(600, 1600); C.emit({ kind: 'blob', color: '#ffffff', edge: '#6fa3c8', x: n.x, y: n.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 100, grav: 900, max: C.rand(0.7, 1.2), s0: C.rand(6, 12), s1: 4, layer: 2 }); }
     // quét sạch quái nhỏ trên màn hình
     for (const e of g.enemies) if (!e.static && !e.dead && e.x < C.W + 40) { e.hp = 0; killEnemy(e, true); }
   }

@@ -89,11 +89,11 @@
  },
  "boss_defeat": {
   "file": "assets/sprites/boss_defeat.webp",
-  "fw": 418,
-  "fh": 420,
+  "fw": 420,
+  "fh": 373,
   "n": 4,
-  "ax": 207.1,
-  "ay": 217.4
+  "ax": 210.8,
+  "ay": 206.7
  },
  "pillar_top": {
   "file": "assets/sprites/pillar_top.webp",
@@ -190,5 +190,55 @@
   "n": 1,
   "ax": 98.9,
   "ay": 87.6
+ },
+ "calota_spray": {
+  "file": "assets/sprites/calota_spray.webp",
+  "fw": 300,
+  "fh": 172,
+  "n": 3,
+  "ax": 163.4,
+  "ay": 33.3,
+  "mx": 168,
+  "my": 100
+ },
+ "foam_stream": {
+  "file": "assets/sprites/foam_stream.webp",
+  "fw": 1024,
+  "fh": 131,
+  "n": 3,
+  "ax": 0,
+  "ay": 65.5
+ },
+ "foam_splash": {
+  "file": "assets/sprites/foam_splash.webp",
+  "fw": 256,
+  "fh": 238,
+  "n": 4,
+  "ax": 129.4,
+  "ay": 127.6
+ },
+ "foam_decal": {
+  "file": "assets/sprites/foam_decal.webp",
+  "fw": 200,
+  "fh": 200,
+  "n": 6,
+  "ax": 100.0,
+  "ay": 100.0
+ },
+ "boss_foam": {
+  "file": "assets/sprites/boss_foam.webp",
+  "fw": 420,
+  "fh": 270,
+  "n": 2,
+  "ax": 209.7,
+  "ay": 136.6
+ },
+ "logo": {
+  "file": "assets/sprites/logo.webp",
+  "fw": 900,
+  "fh": 253,
+  "n": 1,
+  "ax": 453.1,
+  "ay": 130.6
  }
 }

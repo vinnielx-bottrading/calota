@@ -4,6 +4,8 @@ import sys, os, json, numpy as np
 from PIL import Image, ImageFilter
 from scipy import ndimage
 SRC, ADJ, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
+FOAM = sys.argv[4] if len(sys.argv) > 4 else os.path.join(os.path.dirname(ADJ.rstrip('/\\')), 'Phun hóa chất')
+F = lambda p: os.path.join(FOAM, p)
 A = lambda p: os.path.join(SRC, p)
 J = lambda p: os.path.join(ADJ, p)
 meta = {}
@@ -124,6 +126,59 @@ for nm, im in zip(['item_coin', 'item_shield', 'item_bolt', 'item_heart'], items
 fx = slice_sheet(load(J('Cartoon Game Effect Sprite Sheet.png')), 2, 2)
 for nm, im, sc in zip(['spikeball', 'muzzle', 'explosion', 'hitspark'], fx, [128, 200, 300, 200]):
     im = clean_alpha(im); im = im.crop(im.getchannel('A').getbbox()); f, an = align([im], mass_anchor, sc); save_strip(nm, f, an)
+
+
+# ---- PHUN BỌT HÓA CHẤT (thư mục "Phun hóa chất")
+def key_checker(path):
+    """Ảnh RGB dính ô caro giả → tách nền (chỉ xóa vùng caro nối ra mép hoặc vùng lớn có 2 tông caro)."""
+    a = np.array(Image.open(path).convert('RGB')).astype(int); v = a.max(-1); sat = v - a.min(-1)
+    m = (sat < 14) & (v > 112) & (v < 212); lab, n = ndimage.label(m)
+    border = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    sizes = ndimage.sum(m, lab, range(1, n + 1)); keep = np.zeros(n + 1, bool)
+    for i in range(1, n + 1):
+        if i in border: keep[i] = True; continue
+        if sizes[i - 1] > 600:
+            px = v[lab == i]
+            if ((px > 120) & (px < 150)).mean() > 0.2 and ((px > 180) & (px < 205)).mean() > 0.2: keep[i] = True
+    bg = ndimage.binary_dilation(keep[lab], iterations=1)
+    al = np.array(Image.fromarray(np.where(bg, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8)))
+    return Image.fromarray(np.dstack([a.astype(np.uint8), al]), 'RGBA')
+
+if os.path.isdir(FOAM):
+    sheet('calota_spray', F('Chibi Foam-Breath Attack Sprite Sheet.png'), 3, 1, 300, lens_anchor)
+    # vị trí miệng: điểm trái nhất của bọt trắng ở nửa phải frame 2
+    m = meta['calota_spray']; st = np.array(Image.open(os.path.join(OUT, m['file'])))
+    fr = st[:, m['fw']:2 * m['fw']].astype(int)
+    white = (fr[..., 3] > 200) & (fr[..., :3].min(-1) > 215); white[:, :int(m['fw'] * 0.55)] = False
+    ys, xs = np.nonzero(white); x0 = xs.min(); sel = xs < x0 + 14
+    m['mx'], m['my'] = int(x0), int(np.median(ys[sel]))
+    rows = slice_sheet(load(F('Foamy Blast Stream VFX Sheet.png')), 1, 3)
+    rows = [clean_alpha(r) for r in rows]; rows = [r.crop(r.getchannel('A').getbbox()) for r in rows]
+    W0 = 1024; H0 = max(round(r.height * W0 / r.width) for r in rows)
+    rows = [r.resize((W0, H0), Image.LANCZOS) for r in rows]; save_strip('foam_stream', rows, (0, H0 / 2))
+    sheet('foam_splash', F('Four-Frame Cartoon Foam Splash Sprite Sheet.png'), 4, 1, 256)
+    dec = [clean_alpha(d) for d in slice_sheet(load(F('Glossy Cartoon Foam Decal Collection.png')), 3, 2)]
+    dec = [d.crop(d.getchannel('A').getbbox()) for d in dec]
+    S0 = 200; canv = []
+    for d in dec:
+        k = S0 / max(d.size); d = d.resize((max(1, round(d.width * k)), max(1, round(d.height * k))), Image.LANCZOS)
+        c = Image.new('RGBA', (S0, S0)); c.alpha_composite(d, ((S0 - d.width) // 2, (S0 - d.height) // 2)); canv.append(c)
+    save_strip('foam_decal', canv, (S0 / 2, S0 / 2))
+    bf = slice_sheet(key_checker(F('Foam-Covered Spiky Airship Duo.png')), 2, 1)
+    f2, an2 = align(bf, mass_anchor, 420); save_strip('boss_foam', f2, an2)
+    single('logo', F('Glossy CALOTA Cartoon Game Logo.png'), 900)
+
+# ---- Boss 1 kiểu THÙNG GỖ (thư mục "Boss") — ghi đè bản cũ nếu có
+BOSSD = os.path.join(os.path.dirname(FOAM.rstrip('/\\')), 'Boss')
+Bp = lambda p: os.path.join(BOSSD, p)
+if os.path.exists(Bp('Boss1 Barrel Defeat 4f.png')):
+    sheet('boss_defeat', Bp('Boss1 Barrel Defeat 4f.png'), 4, 1, 420)
+if os.path.exists(Bp('Boss1 Barrel Foam 2f.png')):
+    sheet('boss_foam', Bp('Boss1 Barrel Foam 2f.png'), 2, 1, 420)
+if os.path.exists(Bp('Boss1 Barrel Idle Attack 4x2.png')):  # bản D7 kiểu thùng gỗ (chờ gen)
+    bb = slice_sheet(load(Bp('Boss1 Barrel Idle Attack 4x2.png')), 4, 2)
+    bf2, ban2 = align([main_blob(b) for b in bb], mass_anchor, 420)
+    save_strip('boss_idle', bf2[:4], ban2); save_strip('boss_attack', bf2[4:], ban2)
 
 # ---- Nền
 bgdir = os.path.join(OUT, 'assets', 'bg'); os.makedirs(bgdir, exist_ok=True)

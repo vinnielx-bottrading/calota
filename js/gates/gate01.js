@@ -66,7 +66,7 @@
     this.shield = 0; this.shieldMax = 0; this.stacks = 0; this.corrT = 0; this.sprayedT = 9;
     this.state = 'enter'; this.t = 0; this.fireT = 2; this.volleyT = 7; this.summonT = 6; this.chargeT = 7; this.atkT = 0;
     this.flash = 0; this.invT = 0; this.anim = 0; this.r = 125; this.dieT = 0;
-    this.blotches = Array.from({ length: 7 }, () => ({ x: C.rand(0.25, 0.85), y: C.rand(0.2, 0.75), r: C.rand(0.08, 0.18), c: Math.random() < 0.7 ? 'rgba(120,255,40,1)' : 'rgba(150,60,255,1)' }));
+    this.blotches = Array.from({ length: 7 }, () => ({ x: C.rand(0.25, 0.85), y: C.rand(0.2, 0.75), r: C.rand(0.08, 0.18), c: Math.random() < 0.7 ? 'rgba(255,255,255,1)' : 'rgba(170,215,250,1)' }));
   }
   const B = Airship.prototype;
   B.muzzle = function () { return { x: this.x - this.w * 0.42, y: this.y + 8 }; };
@@ -81,7 +81,7 @@
       const k = src === 'bullet' ? 0.2 : src === 'spray' ? 3 : 4;
       this.shield -= dmg * k;
       if (this.shield <= 0) {
-        this.shield = 0; C.sfx.play('shieldBreak'); C.shake(16); C.flash(0.4, '#c8ff70');
+        this.shield = 0; this.hurtT = 0.7; C.sfx.play('shieldBreak'); C.shake(16); C.flash(0.4, '#c8ff70');
         this.g.banner('GIÁP RÊU ĐÃ BỊ ĐỐT TAN!', 1.6, 'hint');
         for (let i = 0; i < 40; i++) { const a = C.rand(0, 6.28), v = C.rand(200, 700); C.emit({ kind: 'glow', img: C.G.lime, x: this.x, y: this.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, drag: 2.5, max: C.rand(0.5, 1), s0: 16, s1: 4, add: true, layer: 2 }); }
       }
@@ -94,6 +94,7 @@
     return dmg;
   };
   B.toPhase = function (n) {
+    this.hurtT = 1.1;
     this.phase = n; this.invT = 1.3; this.shieldMax = this.shield = n === 2 ? 2000 : 2600;
     C.shake(20); C.sfx.play('explode'); C.sfx.play('warn');
     this.g.banner(n === 2 ? 'GIÁP RÊU! Xịt HÓA CHẤT để đốt nhanh' : 'NỔI GIẬN! Giáp rêu dày hơn', 2.4, 'boss');
@@ -140,7 +141,9 @@
       return;
     }
     // di chuyển: bám theo độ cao của Calota + nhấp nhô
-    if (this.state === 'fight') {
+    this.hurtT = (this.hurtT || 0) - dt; this.stunT = (this.stunT || 0) - dt;
+    if (this.state === 'fight' && this.stunT > 0) { this.x = C.lerp(this.x, 1040, dt * 2); this.y += Math.sin(this.anim * 3) * 0.6; }
+    else if (this.state === 'fight') {
       const ty = C.clamp(p.y + Math.sin(this.t * 0.9) * 120, 170, 560);
       this.y = C.lerp(this.y, ty, dt * (this.phase === 3 ? 1.3 : 0.8));
       this.x = C.lerp(this.x, 1010 + Math.sin(this.t * 0.6) * 40, dt * 2);
@@ -192,6 +195,8 @@
     const st = this.state;
     let name = 'boss_idle', f = Math.floor(this.anim * 8);
     if (st === 'dying') { name = 'boss_defeat'; f = Math.min(3, Math.floor(this.t / 0.7)); }
+    else if (this.stunT > 0) { name = 'boss_defeat'; f = 2; }                       // choáng sau Siêu phun
+    else if (this.hurtT > 0) { name = 'boss_defeat'; f = Math.floor(this.anim * 10) % 2; } // trúng đòn nặng
     else if (this.atkT > 0) { name = 'boss_attack'; f = this.atkT > 0.3 ? 0 : 3; }
     const rot = st === 'dying' ? this.t * 0.25 : st === 'charge' ? -0.12 : Math.sin(this.anim * 1.5) * 0.04;
     const corr = this.stacks / 10;
@@ -203,8 +208,9 @@
       ctx.fillStyle = `rgba(255,40,40,${0.18 + 0.15 * Math.sin(this.t * 40)})`; ctx.fillRect(0, this.y - 90, this.x, 180);
       ctx.strokeStyle = 'rgba(255,80,80,0.9)'; ctx.setLineDash([24, 14]); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, this.y); ctx.lineTo(this.x, this.y); ctx.stroke(); ctx.setLineDash([]);
     }
-    if (this.invT > 0 && Math.floor(this.invT * 16) % 2 === 0) C.sprTint(ctx, name, f, this.x, this.y, this.w, '#ffffff', 0.6, { rot });
-    else if (corr > 0) C.sprTint(ctx, name, f, this.x, this.y, this.w, '#7dff2a', 0.12 + corr * 0.35, { rot, blotches: this.blotches.slice(0, Math.ceil(corr * 7)) });
+    if (this.invT > 0 && this.hurtT <= 0 && Math.floor(this.invT * 16) % 2 === 0) C.sprTint(ctx, name, f, this.x, this.y, this.w, '#ffffff', 0.6, { rot });
+    else if (this.stacks >= 8 && st !== 'dying' && this.atkT <= 0 && this.hurtT <= 0 && this.stunT <= 0) C.spr(ctx, 'boss_foam', this.stacks >= 9 ? 1 : 0, this.x, this.y + 10, this.w * 1.08, { rot }); // ngộp trong bọt
+    else if (corr > 0) C.sprTint(ctx, name, f, this.x, this.y, this.w, '#f4fbff', 0.05 + corr * 0.12, { rot, blotches: this.blotches.slice(0, Math.ceil(corr * 7)) });
     else if (this.flash > 0) C.sprTint(ctx, name, f, this.x, this.y, this.w, '#fff4d0', 0.22, { rot });
     else C.spr(ctx, name, f, this.x, this.y, this.w, { rot });
     // giáp rêu: vòng khiên lá xanh

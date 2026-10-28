@@ -9,7 +9,9 @@
       hurtT: 0, dashT: 0, dashCd: 0, fireCd: 0, anim: 0, dead: false, deadT: 0, r: 26
     };
   };
-  E.nozzle = p => ({ x: p.x + 62, y: p.y + 22 });
+  // miệng Calota (điểm bắt đầu luồng bọt) — tính từ sprite phun
+  const SPRAY_W = 230, SPRAY_OX = 18, SPRAY_OY = -4;
+  E.nozzle = p => { const m = C.SPRITES.calota_spray, s = SPRAY_W / m.fw; return { x: p.x + SPRAY_OX + (m.mx - m.fw / 2) * s, y: p.y + SPRAY_OY + (m.my - m.fh / 2) * s }; };
 
   E.updatePlayer = function (g, dt) {
     const p = g.player, I = C.input;
@@ -58,7 +60,9 @@
     const tilt = C.clamp(p.vy / 1400, -0.18, 0.22);
     if (p.dead) C.spr(ctx, 'calota_fall', 0, p.x, p.y, 160, { rot: p.deadT * 6 });
     else if (p.hurtT > 0) C.spr(ctx, 'calota_hurt', Math.floor(p.anim * 10), p.x, p.y, 156, { rot: tilt });
-    else if (p.dashT > 0 || g.ultActive) C.spr(ctx, 'calota_dash', Math.floor(p.anim * 14), p.x - 6, p.y + 2, 172, { rot: g.ultActive ? 0 : tilt });
+    else if (g.cutin > 0) C.spr(ctx, 'calota_spray', 0, p.x + SPRAY_OX, p.y + SPRAY_OY, SPRAY_W * (1 + 0.06 * Math.sin(p.anim * 40))); // phồng má lấy đà
+    else if (C.Chem.active) C.spr(ctx, 'calota_spray', C.Chem.power < 0.5 ? 0 : 1 + (Math.floor(p.anim * 12) % 2), p.x + SPRAY_OX, p.y + SPRAY_OY, SPRAY_W);
+    else if (p.dashT > 0) C.spr(ctx, 'calota_dash', Math.floor(p.anim * 14), p.x - 6, p.y + 2, 172, { rot: tilt });
     else C.spr(ctx, 'calota_fly', Math.floor(p.anim * 16), p.x, p.y, 150, { rot: tilt });
     ctx.globalAlpha = 1;
     if (p.shield > 0 && !p.dead) {
@@ -132,7 +136,7 @@
     const corr = Math.min(1, e.corr / 2);
     const draw = (name, f, x, y, w, o) => {
       if (flash) C.sprTint(ctx, name, f, x, y, w, '#ffffff', 0.7, o);
-      else if (corr > 0.05) C.sprTint(ctx, name, f, x, y, w, '#59ff3a', corr * 0.55, o);
+      else if (corr > 0.05) C.sprTint(ctx, name, f, x, y, w, '#f2faff', corr * 0.6, o);
       else C.spr(ctx, name, f, x, y, w, o);
     };
     switch (e.type) {

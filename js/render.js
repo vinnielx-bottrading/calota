@@ -54,12 +54,14 @@
     E.drawItems(ctx, g);
     for (const e of g.enemies) if (!e.static) E.drawEnemy(ctx, e);
     if (g.boss) g.boss.draw(ctx);
+    C.Decals.draw(ctx);
     C.drawParticles(ctx, 1);
     E.drawBullets(ctx, g);
     C.Chem.drawJet(ctx);
     E.drawPlayer(ctx, g);
     C.drawParticles(ctx, 2);
     C.drawForeground(ctx, t);
+    C.Decals.drawScreen(ctx);
     C.drawParticles(ctx, 3);
     ctx.restore();
 
@@ -67,7 +69,7 @@
     if (C.Chem.active) {
       const k = C.Chem.power * (g.ultActive ? 0.45 : 0.16);
       const v = ctx.createRadialGradient(C.W / 2, C.H / 2, C.H * 0.35, C.W / 2, C.H / 2, C.H * 0.95);
-      v.addColorStop(0, 'rgba(60,255,90,0)'); v.addColorStop(1, `rgba(40,200,70,${k})`);
+      v.addColorStop(0, 'rgba(200,230,255,0)'); v.addColorStop(1, `rgba(190,225,255,${k})`);
       ctx.fillStyle = v; ctx.fillRect(0, 0, C.W, C.H);
     }
     if (g.player && g.player.hp === 1 && !g.player.dead) {
@@ -104,7 +106,7 @@
     rr(ctx, bx, by, bw, bh, 10); ctx.fillStyle = '#0e2a1a'; ctx.fill();
     if (k > 0) {
       ctx.save(); rr(ctx, bx, by, bw * k, bh, 10); ctx.clip();
-      const gr = ctx.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, '#2bd67b'); gr.addColorStop(0.6, '#9dff3a'); gr.addColorStop(1, '#eaff7a');
+      const gr = ctx.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, '#3aa0e8'); gr.addColorStop(0.6, '#9fdcff'); gr.addColorStop(1, '#ffffff');
       ctx.fillStyle = gr; ctx.fillRect(bx, by, bw, bh);
       ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(bx, by + 3, bw, 4);
       for (let i = 0; i < 9; i++) { const ph = (now * 0.6 + i * 0.137) % 1; ctx.beginPath(); ctx.arc(bx + ((i * 61) % bw), by + bh - ph * bh, 2 + (i % 3), 0, 7); ctx.fillStyle = 'rgba(240,255,200,0.6)'; ctx.fill(); }
@@ -112,10 +114,10 @@
     }
     if (full && !g.ultActive) {
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + 0.4 * Math.sin(now * 8);
-      ctx.drawImage(C.G.lime, bx - 30, by - 40, bw + 60, bh + 80); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(C.G.ice, bx - 30, by - 40, bw + 60, bh + 80); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     }
-    txt(ctx, 'HÓA CHẤT', bx + 8, by + bh / 2 + 1, 15, '#fff');
-    if (full && !g.ultActive) txt(ctx, C.input.usingTouch ? 'SIÊU PHUN SẴN SÀNG!' : 'SIÊU PHUN SẴN SÀNG · [K]', bx, by + bh + 20, 17, '#eaff7a');
+    txt(ctx, 'HÓA CHẤT', bx + 8, by + bh / 2 + 1, 15, '#fff', 'left', '#0b3a5a');
+    if (full && !g.ultActive) txt(ctx, C.input.usingTouch ? 'SIÊU PHUN SẴN SÀNG!' : 'SIÊU PHUN SẴN SÀNG · [K]', bx, by + bh + 20, 17, '#ffffff', 'left', '#0b3a5a');
     // điểm & xu
     txt(ctx, g.score.toLocaleString('vi-VN'), C.W - 24, 36, 30, '#fff', 'right');
     C.spr(ctx, 'item_coin', 0, C.W - 110, 74, 30); txt(ctx, '× ' + g.coins, C.W - 88, 75, 22, '#ffe066');
@@ -139,7 +141,7 @@
       [0.66, 0.33].forEach(m => { ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(bx2 + bw2 * m - 1, by2 + 1, 3, 18); });
       if (B.shield > 0) { rr(ctx, bx2, by2 + 22, bw2 * B.shield / B.shieldMax, 9, 4); ctx.fillStyle = '#7dff4a'; ctx.fill(); txt(ctx, 'GIÁP RÊU', bx2 + bw2 + 12, by2 + 27, 13, '#9dff5a'); }
       if (B.stacks > 0) {
-        txt(ctx, 'ĂN MÒN ×' + B.stacks + '  (+' + B.stacks * 8 + '% sát thương)', C.W / 2, by2 + 46, 16, '#b6ff3a', 'center');
+        txt(ctx, 'NGỘP BỌT ×' + B.stacks + '  (+' + B.stacks * 8 + '% sát thương)', C.W / 2, by2 + 46, 16, '#cfeeff', 'center');
       }
     }
   }
@@ -159,7 +161,7 @@
       } else if (b.style === 'boss') {
         txt(ctx, b.text, C.W / 2, 150 + row * 50, 40, '#ff8a5a', 'center'); row++;
       } else if (b.style === 'small') {
-        txt(ctx, b.text, g.player.x, g.player.y - 80 - k * 30, 22, '#b6ff3a', 'center');
+        txt(ctx, b.text, g.player.x, g.player.y - 80 - k * 30, 22, '#cfeeff', 'center');
       } else { txt(ctx, b.text, C.W / 2, C.H - 120 - row * 46, 30, '#fff', 'center'); row++; }
     }
     ctx.globalAlpha = 1;
@@ -168,12 +170,12 @@
   // cut-in anime khi kích hoạt Siêu phun
   function drawCutin(ctx) {
     const k = 1 - g.cutin / 0.95; // 0 → 1
-    ctx.fillStyle = `rgba(5,20,10,${Math.min(0.7, k * 3)})`; ctx.fillRect(0, 0, C.W, C.H);
+    ctx.fillStyle = `rgba(5,15,30,${Math.min(0.7, k * 3)})`; ctx.fillRect(0, 0, C.W, C.H);
     // dải chéo
     const bandIn = Math.min(1, k * 4);
     ctx.save(); ctx.translate(C.W / 2, C.H / 2); ctx.rotate(-0.12);
     const bw = C.W * 1.4 * bandIn;
-    const gr = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0); gr.addColorStop(0, '#1fd17a'); gr.addColorStop(0.5, '#b6ff3a'); gr.addColorStop(1, '#1fd1a8');
+    const gr = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0); gr.addColorStop(0, '#2f8fe0'); gr.addColorStop(0.5, '#bfe8ff'); gr.addColorStop(1, '#3fb6f0');
     ctx.fillStyle = gr; ctx.fillRect(-bw / 2, -130, bw, 260);
     ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillRect(-bw / 2, -138, bw, 6); ctx.fillRect(-bw / 2, 132, bw, 6);
     // vạch tốc độ
@@ -186,8 +188,8 @@
     // chữ
     const tx = C.lerp(C.W + 400, 820, Math.min(1, Math.max(0, k * 3 - 0.3))) - k * 30;
     ctx.save(); ctx.translate(tx, C.H / 2); ctx.rotate(-0.12);
-    txt(ctx, 'SIÊU PHUN', 0, -40, 92, '#ffffff', 'center', '#0b4a24');
-    txt(ctx, 'HÓA CHẤT!', 0, 52, 84, '#eaff3a', 'center', '#0b4a24');
+    txt(ctx, 'SIÊU PHUN', 0, -40, 92, '#ffffff', 'center', '#0b3a5a');
+    txt(ctx, 'HÓA CHẤT!', 0, 52, 84, '#ffe066', 'center', '#0b3a5a');
     ctx.restore();
   }
 })(window.C);

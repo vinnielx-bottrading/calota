@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.4.1
+# CALOTA – Phi Công Hóa Chất · v0.5.1
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -41,8 +41,9 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 
 ## Cơ chế chính
 - **Thanh hóa chất (0–100):** tự hồi 2,5/giây; +0,5 mỗi viên trúng; +6 mỗi quái hạ; +45 khi nhặt ⚡. Phun tốn 22/giây.
-- **Phun thường:** tầm 520px, quái nhỏ tan chảy, **hòa tan đạn gai** của boss, đốt được **dây gai** (đạn thường vô hiệu).
-- **Ăn mòn:** mỗi 0,3 giây bị xịt boss +1 tầng (tối đa 10), mỗi tầng **+8% sát thương từ mọi nguồn**. Ngừng xịt 1,2 giây thì giảm dần. Boss chuyển xanh, nhỏ giọt, bốc khói.
+- **Phun thường:** Calota phồng má rồi **phun bọt hóa chất trắng bằng miệng**, tầm 520px; quái nhỏ chìm trong bọt, **nuốt chửng đạn gai** của boss, phá được **dây gai** (đạn thường vô hiệu).
+- **Bọt bám lâu:** vết bọt dính lên boss/quái/cột đá 5–8 giây, chảy xệ và nhỏ giọt; giọt rơi đọng thành vũng dưới đất ~8 giây; Siêu phun văng bọt lên màn hình 3–4 giây.
+- **Ngộp bọt (trước là Ăn mòn):** mỗi 0,3 giây bị xịt boss +1 tầng (tối đa 10), mỗi tầng **+8% sát thương từ mọi nguồn**. Ngừng xịt 1,2 giây thì giảm dần. Boss phủ bọt, nhỏ giọt; từ 8 tầng chuyển sang sprite boss ngộp bọt.
 - **Siêu phun:** cut-in anime 0,95s (thời gian gần như dừng) → sóng xung kích quét sạch quái nhỏ → luồng khổng lồ 2,8s, Calota bất tử, sát thương ×3,5, ăn mòn tối đa rất nhanh.
 - **Giáp rêu** (boss giai đoạn 2 và 3): đạn thường chỉ gây 20%, hóa chất gây 300%, Siêu phun 400%.
 
@@ -84,7 +85,7 @@ sw.js, manifest.webmanifest  PWA
 ## Thêm cửa mới
 1. Tạo ảnh bằng prompt trong `docs/CALOTA_PROMPTS.html`.
 2. Thêm dòng cắt ảnh vào `tools/build_assets.py`, chạy:
-   `python tools/build_assets.py "<thư mục ảnh gốc>" "<thư mục Điều chỉnh>" .`
+   `python tools/build_assets.py "<thư mục ảnh gốc>" "<thư mục Điều chỉnh>" . "<thư mục Phun hóa chất>"`
 3. Tạo `js/gates/gate02.js` theo mẫu `gate01.js` (`timeline()` + `makeBoss()`), thêm `<script>` vào `index.html`.
 
 ## Ủng hộ
@@ -104,5 +105,7 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.5.1** – Boss chốt kiểu thùng gỗ: ảnh bị hạ & ngộp bọt mới; boss có hoạt cảnh đau khi vỡ giáp/chuyển giai đoạn và CHOÁNG 1,4s sau Siêu phun. Ảnh boss nằm ở thư mục `Boss/` cạnh `Phun hóa chất/`; khi có `Boss1 Barrel Idle Attack 4x2.png` chạy lại build_assets là boss đổi dáng hoàn toàn. Prompt v8: gói hoạt cảnh G–K.
+- **0.5.0** – Chiêu phun đổi thành bọt trắng phun bằng miệng (ảnh thật), vết bọt bám/đọng lâu, boss ngộp bọt, logo mới ở menu.
 - **0.4.1** – Bảng Ủng hộ VietQR có chọn số tiền; vercel.json; prompt ảnh marketing + công cụ cắt ảnh.
 - **0.4.0** – Dựng Cửa 1 chơi được: chiêu phun hóa chất + Siêu phun, boss 3 giai đoạn có giáp rêu, PWA, điều khiển cảm ứng.

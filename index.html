@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Calota – Phi Công Hóa Chất</title>
-<meta name="description" content="Calota – game bắn boss bay ngang: phun hóa chất ăn mòn, hạ Khinh Khí Cầu Gai Rêu.">
+<meta name="description" content="Calota – game bắn boss bay ngang: phun bọt hóa chất bằng miệng, hạ Khinh Khí Cầu Gai Rêu.">
 <meta name="theme-color" content="#1fa85a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
@@ -22,7 +22,7 @@
 
 <canvas id="game"></canvas>
 
-<div id="loading"><div class="logo">CALOTA</div><div class="bar"><i id="loadBar"></i></div><p>Đang nạp cánh bay…</p></div>
+<div id="loading"><img class="logoImg" src="assets/sprites/logo.webp" alt="CALOTA" onerror="this.outerHTML='<div class=logo>CALOTA</div>'"><div class="bar"><i id="loadBar"></i></div><p>Đang nạp cánh bay…</p></div>
 
 <!-- nút cảm ứng -->
 <div id="touchUI">
@@ -36,8 +36,8 @@
 <!-- MENU -->
 <section id="menu" class="panel">
   <div class="menuBox">
-    <h1 class="logo">CALOTA</h1>
-    <p class="tag">Phi công hạt đậu · Phun hóa chất · Hạ boss trâu</p>
+    <h1 class="logoImg"><img src="assets/sprites/logo.webp" alt="CALOTA"></h1>
+    <p class="tag">Phi công hạt đậu · Phun bọt hóa chất · Hạ boss trâu</p>
     <div class="gateCard">
       <img src="assets/ui/g1_thumb.webp" alt="">
       <div><b>CỬA 1</b><span>Rừng Đá Đảo Trời</span><small>Boss: Khinh Khí Cầu Gai Rêu</small></div>
@@ -59,8 +59,8 @@
     <ul>
       <li><b>Bay:</b> phím mũi tên / WASD · điện thoại: kéo ngón tay ở nửa trái màn hình.</li>
       <li><b>Bắn:</b> tự động.</li>
-      <li><b>PHUN HÓA CHẤT:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN. Tốn thanh hóa chất, làm quái tan chảy, hòa tan đạn gai và gây <b>Ăn mòn</b> boss (mỗi tầng +8% sát thương, tối đa ×10).</li>
-      <li><b>SIÊU PHUN:</b> thanh đầy → <kbd>K</kbd> hoặc nút SIÊU PHUN. Luồng khổng lồ, bất tử, quét sạch quái nhỏ.</li>
+      <li><b>PHUN HÓA CHẤT:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN — Calota phồng má phun luồng bọt trắng bằng miệng. Tốn thanh hóa chất, dìm quái trong bọt, nuốt chửng đạn gai và làm boss <b>Ngộp bọt</b> (mỗi tầng +8% sát thương, tối đa ×10). Bọt bám lại trên boss, cột đá và đọng vũng dưới đất vài giây.</li>
+      <li><b>SIÊU PHUN:</b> thanh đầy → <kbd>K</kbd> hoặc nút SIÊU PHUN. Sóng bọt khổng lồ phủ kín màn hình, bất tử, quét sạch quái nhỏ.</li>
       <li><b>Lướt:</b> <kbd>Shift</kbd>/<kbd>L</kbd> — né đạn trong chớp mắt.</li>
       <li><b>Giáp rêu</b> của boss gần như miễn đạn thường — phải dùng hóa chất đốt.</li>
       <li>Nạp hóa chất: nhặt ⚡, bắn trúng, hạ quái.</li>

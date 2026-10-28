@@ -88,3 +88,8 @@ body.portrait #rotate { display: grid; }
   .donateBox .row { justify-content: flex-start; }
   .donateBox .note, .bankLine { margin: 4px 0; }
 }
+
+.logoImg { margin: 0; line-height: 0; }
+.logoImg img, img.logoImg { width: min(46vw, 560px); filter: drop-shadow(0 6px 0 rgba(42,22,8,.6)); }
+#loading img.logoImg { width: min(70vw, 520px); }
+@media (max-height: 500px) { .logoImg img { width: min(40vw, 360px); } }

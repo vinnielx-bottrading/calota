@@ -19,6 +19,8 @@
     G.smoke = glow('smoke', [[0, 'rgba(120,110,130,0.55)'], [0.6, 'rgba(90,85,100,0.25)'], [1, 'rgba(60,60,70,0)']]);
     G.white = glow('white', [[0, 'rgba(255,255,255,1)'], [0.3, 'rgba(255,255,220,0.7)'], [1, 'rgba(255,255,200,0)']]);
     G.orange = glow('orange', [[0, 'rgba(255,250,200,1)'], [0.3, 'rgba(255,190,60,0.8)'], [1, 'rgba(255,90,0,0)']]);
+    G.foam = glow('foam', [[0, 'rgba(255,255,255,0.95)'], [0.45, 'rgba(220,240,255,0.55)'], [1, 'rgba(180,215,245,0)']]);
+    G.ice = glow('ice', [[0, 'rgba(230,248,255,1)'], [0.35, 'rgba(140,210,255,0.6)'], [1, 'rgba(60,150,230,0)']]);
     G.red = glow('red', [[0, 'rgba(255,200,200,0.9)'], [0.4, 'rgba(255,60,40,0.5)'], [1, 'rgba(160,0,0,0)']]);
   };
 
@@ -78,7 +80,8 @@
           ctx.ellipse(p.x, p.y, s * 0.55, s * (1 + Math.min(2.2, p.vy / 120)), 0, 0, 7); ctx.fill();
           break;
         }
-        case 'img': C.spr(ctx, p.img, 0, p.x, p.y, s, { rot: p.rot }); break;
+        case 'img': C.spr(ctx, p.img, p.f || 0, p.x, p.y, s, { rot: p.rot, flip: p.flip }); break;
+        case 'anim': { const n = (C.SPRITES[p.img] || { n: 1 }).n; C.spr(ctx, p.img, Math.min(n - 1, Math.floor(k * n)), p.x, p.y, s, { rot: p.rot, flip: p.flip }); break; }
         case 'text': {
           ctx.font = `900 ${Math.round(s)}px "Baloo 2", system-ui, sans-serif`; ctx.textAlign = 'center';
           ctx.lineWidth = Math.max(3, s * 0.18); ctx.strokeStyle = p.stroke || '#16301c'; ctx.strokeText(p.text, p.x, p.y);
@@ -149,93 +152,104 @@
       const r = Math.random();
       const a = Chem.dir + C.rand(-pr.half, pr.half) * 0.8;
       const ca = Math.cos(a), sa = Math.sin(a);
-      if (r < 0.25) { // cục chất lỏng có viền bay trong luồng
+      if (r < 0.3) { // cục bọt bay trong luồng
         const v = C.rand(900, 1300) * (ult ? 1.3 : 1);
-        C.emit({ kind: 'blob', color: Math.random() < 0.6 ? '#9be22c' : '#4fd04a', x: Chem.x, y: Chem.y, vx: ca * v, vy: sa * v, drag: 1.2, max: len / v * 0.95, s0: ult ? 9 : 5, s1: ult ? 26 : 14, layer: 2, fadePow: 4, squash: 0.7, rot: a });
-      } else if (r < 0.45) { // quầng sáng độc
-        const v = C.rand(900, 1400) * (ult ? 1.3 : 1);
-        C.emit({ kind: 'glow', img: G.goo, x: Chem.x, y: Chem.y, vx: ca * v, vy: sa * v, drag: 1.8, max: len / v * 1.15, s0: ult ? 18 : 9, s1: ult ? 80 : 40, layer: 1, a0: 0.7, fadePow: 2.2 });
-      } else if (r < 0.7) { // sương độc lan ra
-        const d = C.rand(0.25, 1) * len, v = C.rand(60, 160);
-        C.emit({ kind: 'glow', img: Math.random() < 0.25 ? G.purple : G.toxic, x: Chem.x + ca * d, y: Chem.y + sa * d, vx: ca * v + C.rand(-40, 40), vy: sa * v + C.rand(-60, 10), drag: 1.2, max: C.rand(0.7, 1.3), s0: ult ? 60 : 28, s1: ult ? 210 : 105, layer: 1, a0: ult ? 0.6 : 0.45, fadeIn: 0.15 });
-      } else if (r < 0.88) { // giọt hóa chất rơi theo trọng lực
-        const v = C.rand(500, 900);
-        C.emit({ kind: 'blob', color: Math.random() < 0.5 ? '#a6ee2e' : '#5ad84a', x: Chem.x, y: Chem.y, vx: ca * v, vy: sa * v - C.rand(40, 160), grav: 1100, max: C.rand(0.5, 0.9), s0: C.rand(3.5, 6), s1: 2.5, layer: 2 });
-      } else if (r < 0.97) { // bong bóng sủi
-        const d = C.rand(0.2, 0.9) * len;
-        C.emit({ kind: 'bubble', color: Math.random() < 0.3 ? 'rgba(200,120,255,0.9)' : 'rgba(160,255,120,0.95)', x: Chem.x + ca * d, y: Chem.y + sa * d + C.rand(-20, 20), vx: C.rand(-30, 30), vy: C.rand(-120, -40), wob: 9, seed: Math.random() * 9, max: C.rand(0.5, 1.0), s0: C.rand(4, 9), s1: C.rand(8, 16), layer: 2, onDie: popBubble });
-      } else { // tia tím độc hiếm cho chiều sâu màu
-        const v = C.rand(700, 1100);
-        C.emit({ kind: 'glow', img: G.purple, x: Chem.x, y: Chem.y, vx: ca * v, vy: sa * v, drag: 2, max: 0.35, s0: 5, s1: 26, add: true, layer: 2 });
+        C.emit({ kind: 'blob', color: '#ffffff', edge: '#6fa3c8', x: Chem.x, y: Chem.y, vx: ca * v, vy: sa * v, drag: 1.2, max: len / v * 0.95, s0: ult ? 10 : 6, s1: ult ? 30 : 16, layer: 2, fadePow: 4, squash: 0.8, rot: a });
+      } else if (r < 0.5) { // hơi bọt mờ lan ra
+        const d = C.rand(0.3, 1) * len, v = C.rand(60, 160);
+        C.emit({ kind: 'glow', img: G.foam, x: Chem.x + ca * d, y: Chem.y + sa * d, vx: ca * v + C.rand(-40, 40), vy: sa * v + C.rand(-50, 20), drag: 1.2, max: C.rand(0.8, 1.4), s0: ult ? 50 : 24, s1: ult ? 190 : 90, layer: 1, a0: ult ? 0.55 : 0.4, fadeIn: 0.15 });
+      } else if (r < 0.8) { // giọt bọt văng & rơi
+        const v = C.rand(500, 950);
+        C.emit({ kind: 'blob', color: Math.random() < 0.7 ? '#ffffff' : '#dff1ff', edge: '#6fa3c8', x: Chem.x, y: Chem.y, vx: ca * v + C.rand(-80, 80), vy: sa * v - C.rand(40, 220), grav: 1100, max: C.rand(0.6, 1.1), s0: C.rand(4, 8), s1: 3, layer: 2, onDie: groundDrop });
+      } else { // bong bóng xà phòng
+        const d = C.rand(0.15, 0.9) * len;
+        C.emit({ kind: 'bubble', color: 'rgba(120,190,240,0.95)', x: Chem.x + ca * d, y: Chem.y + sa * d + C.rand(-24, 24), vx: C.rand(-30, 30), vy: C.rand(-130, -40), wob: 9, seed: Math.random() * 9, max: C.rand(0.6, 1.2), s0: C.rand(4, 9), s1: C.rand(9, 18), layer: 2, onDie: popBubble });
       }
     }
-    // tia sáng ở miệng vòi
-    if (Math.random() < 0.5) C.emit({ kind: 'glow', img: G.white, x: Chem.x, y: Chem.y, max: 0.08, s0: ult ? 70 : 34, s1: ult ? 90 : 46, add: true, layer: 2 });
-    // tóe hóa chất tại điểm trúng
-    if (Chem.hitPoint && Math.random() < (ult ? 0.9 : 0.6)) Chem.splash(Chem.hitPoint.x, Chem.hitPoint.y, ult ? 2 : 1);
+    // tóe bọt tại điểm trúng
+    Chem.splashT = (Chem.splashT || 0) - dt;
+    if (Chem.hitPoint && Chem.splashT <= 0) { Chem.splashT = ult ? 0.07 : 0.12; Chem.splash(Chem.hitPoint.x, Chem.hitPoint.y, ult ? 2 : 1); }
   };
-  function popBubble(p) { C.emit({ kind: 'ring', color: 'rgba(200,255,170,0.9)', x: p.x, y: p.y, max: 0.15, s0: 3, s1: 14, lw: 3, layer: 2 }); }
+  function popBubble(p) { C.emit({ kind: 'ring', color: 'rgba(200,235,255,0.95)', x: p.x, y: p.y, max: 0.15, s0: 3, s1: 14, lw: 3, layer: 2 }); }
+  // giọt rơi chạm đất → đọng thành vũng bọt
+  function groundDrop(p) { if (p.y > C.H - 140 && Math.random() < 0.25) Decals.add(null, C.rand(p.x - 10, p.x + 10), C.H - C.rand(40, 70), 4, C.rand(60, 110), 8); }
 
   Chem.splash = function (x, y, k) {
+    C.emit({ kind: 'anim', img: 'foam_splash', x: x + C.rand(-8, 8), y: y + C.rand(-10, 10), max: 0.42, s0: 110 * k, s1: 150 * k, layer: 2, fadePow: 6, rot: C.rand(-0.3, 0.3), flip: true });
     for (let i = 0; i < 3 * k; i++) {
-      const a = Math.PI + C.rand(-1.3, 1.3), v = C.rand(200, 520);
-      C.emit({ kind: 'blob', color: Math.random() < 0.5 ? '#b0f034' : '#62dc4c', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 100, grav: 1300, max: C.rand(0.3, 0.6), s0: C.rand(3.5, 7), s1: 2, layer: 2 });
+      const a = Math.PI + C.rand(-1.4, 1.4), v = C.rand(200, 560);
+      C.emit({ kind: 'blob', color: '#ffffff', edge: '#6fa3c8', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, grav: 1200, max: C.rand(0.5, 0.9), s0: C.rand(4, 8), s1: 3, layer: 2, onDie: groundDrop });
     }
-    C.emit({ kind: 'blob', color: '#9be22c', x: x + C.rand(-10, 10), y: y + C.rand(-14, 14), max: 0.14, s0: 10 * k, s1: 26 * k, layer: 2, squash: 0.8, fadePow: 3 });
-    C.emit({ kind: 'glow', img: G.lime, x, y, max: 0.1, s0: 24 * k, s1: 44 * k, add: true, layer: 2, a0: 0.5 });
-    if (Math.random() < 0.35 * k) C.emit({ kind: 'glow', img: G.smoke, x: x + C.rand(-20, 20), y, vx: C.rand(-20, 20), vy: C.rand(-140, -70), max: C.rand(0.7, 1.1), s0: 16, s1: 60, layer: 2, a0: 0.75 });
   };
-  /** Vệt nhỏ giọt + khói xèo xèo trên mục tiêu bị ăn mòn */
+  /** Mục tiêu ngộp bọt: nhỏ giọt + sủi bong bóng */
   Chem.corrode = function (x, y, w, h, level) {
-    if (Math.random() < 0.08 + level * 0.05) C.emit({ kind: 'drip', color: Math.random() < 0.5 ? 'rgba(170,255,70,0.95)' : 'rgba(90,240,150,0.9)', x: x + C.rand(-w * 0.4, w * 0.4), y: y + C.rand(-h * 0.2, h * 0.3), vy: 20, grav: 260, max: C.rand(0.6, 1.1), s0: C.rand(4, 7), s1: 3, layer: 2 });
-    if (Math.random() < 0.04 + level * 0.03) C.emit({ kind: 'glow', img: G.smoke, x: x + C.rand(-w * 0.4, w * 0.4), y: y + C.rand(-h * 0.4, h * 0.2), vx: C.rand(-15, 15), vy: C.rand(-90, -40), max: C.rand(0.8, 1.4), s0: 10, s1: 46, layer: 2, a0: 0.7 });
-    if (Math.random() < 0.03 + level * 0.02) C.emit({ kind: 'bubble', color: 'rgba(190,255,90,0.9)', x: x + C.rand(-w * 0.35, w * 0.35), y: y + C.rand(-h * 0.35, h * 0.35), vy: -20, max: C.rand(0.3, 0.5), s0: 3, s1: 9, layer: 2, onDie: popBubble });
+    if (Math.random() < 0.08 + level * 0.06) C.emit({ kind: 'drip', color: Math.random() < 0.6 ? 'rgba(250,253,255,0.97)' : 'rgba(200,232,255,0.95)', x: x + C.rand(-w * 0.4, w * 0.4), y: y + C.rand(-h * 0.1, h * 0.35), vy: 20, grav: 240, max: C.rand(0.8, 1.4), s0: C.rand(4, 8), s1: 3, layer: 2, onDie: groundDrop });
+    if (Math.random() < 0.04 + level * 0.04) C.emit({ kind: 'bubble', color: 'rgba(120,190,240,0.95)', x: x + C.rand(-w * 0.35, w * 0.35), y: y + C.rand(-h * 0.35, h * 0.35), vy: -30, max: C.rand(0.4, 0.8), s0: 4, s1: 11, layer: 2, onDie: popBubble });
   };
 
-  /** Vẽ luồng chất lỏng dạng dải uốn lượn nhiều lớp (vẽ trước hạt) */
+  /** Luồng bọt: ảnh dải bọt (3 biến thể) kéo từ miệng tới điểm trúng */
   Chem.drawJet = function (ctx) {
     if (!Chem.active) return;
     const pr = Chem.params(), len = Math.min(pr.range, Chem.hitDist || pr.range) * Chem.power;
-    if (len < 10) return;
+    const m = C.SPRITES.foam_stream, im = C.img.foam_stream;
+    if (len < 10 || !m || !im) return;
+    const t = Chem.t, f = Math.floor(t * 16) % m.n;
+    const H = (Chem.ult ? 330 : 120) * (0.9 + 0.1 * Math.sin(t * 40));
+    const srcW = m.fw * Math.min(1, len / pr.range * 1.15);
     ctx.save(); ctx.translate(Chem.x, Chem.y); ctx.rotate(Chem.dir);
-    const N = 22, t = Chem.t;
-    const shape = (wMul, amp) => {
-      const up = [], dn = [];
-      for (let i = 0; i <= N; i++) {
-        const k = i / N, d = k * len;
-        const wob = Math.sin(d * 0.035 - t * 38) * amp * k * (Chem.ult ? 2.2 : 1) + Math.sin(d * 0.011 - t * 13) * amp * 0.6 * k;
-        const w = (pr.w0 + (pr.w1 - pr.w0) * Math.pow(k, 0.8)) * wMul * (1 + 0.12 * Math.sin(t * 50 + i));
-        up.push([d, wob - w / 2]); dn.push([d, wob + w / 2]);
-      }
-      ctx.beginPath(); ctx.moveTo(up[0][0], up[0][1]);
-      for (const p of up) ctx.lineTo(p[0], p[1]);
-      // đầu luồng bo tròn
-      const e1 = up[N], e2 = dn[N]; ctx.quadraticCurveTo(e1[0] + (e2[1] - e1[1]) * 0.45, (e1[1] + e2[1]) / 2, e2[0], e2[1]);
-      for (let i = dn.length - 1; i >= 0; i--) ctx.lineTo(dn[i][0], dn[i][1]);
-      ctx.closePath();
-    };
-    // quầng độc phía sau
-    ctx.globalCompositeOperation = 'source-over';
-    shape(1.25, 12); const gh = ctx.createLinearGradient(0, 0, len, 0);
-    gh.addColorStop(0, 'rgba(60,200,60,0.35)'); gh.addColorStop(1, 'rgba(120,60,220,0.08)'); ctx.fillStyle = gh; ctx.fill();
-    // thân chất lỏng có viền đậm kiểu hoạt hình
-    shape(0.62, 7);
-    const gb = ctx.createLinearGradient(0, 0, len, 0);
-    gb.addColorStop(0, '#d8ff5a'); gb.addColorStop(0.35, '#8fe02a'); gb.addColorStop(1, 'rgba(60,190,60,0.55)');
-    ctx.fillStyle = gb; ctx.fill();
-    ctx.lineWidth = Chem.ult ? 5 : 3; ctx.strokeStyle = 'rgba(16,80,30,0.85)'; ctx.lineJoin = 'round'; ctx.stroke();
-    // lõi sáng
-    ctx.globalCompositeOperation = 'lighter';
-    shape(0.2, 4); const gc = ctx.createLinearGradient(0, 0, len, 0);
-    gc.addColorStop(0, 'rgba(255,255,220,0.95)'); gc.addColorStop(1, 'rgba(220,255,140,0.1)'); ctx.fillStyle = gc; ctx.fill();
-    // vệt tốc độ chạy dọc luồng
-    ctx.strokeStyle = 'rgba(240,255,200,0.55)'; ctx.lineWidth = Chem.ult ? 4 : 2; ctx.lineCap = 'round';
-    for (let i = 0; i < (Chem.ult ? 9 : 5); i++) {
-      const ph = ((t * 3.2 + i * 0.37) % 1), d = ph * len, sl = 60 + 80 * ph;
-      const off = Math.sin(i * 12.9) * (pr.w0 + (pr.w1 - pr.w0) * ph) * 0.35;
-      ctx.beginPath(); ctx.moveTo(d, off); ctx.lineTo(Math.min(len, d + sl), off); ctx.stroke();
+    if (Chem.ult) { // lớp sóng bọt to phía sau
+      ctx.globalAlpha = 0.55; ctx.save(); ctx.scale(1, -1);
+      ctx.drawImage(im, ((f + 1) % m.n) * m.fw, 0, srcW, m.fh, -10, -H * 0.65, len + 40, H * 1.3); ctx.restore(); ctx.globalAlpha = 1;
     }
+    if (f % 2) ctx.scale(1, -1);
+    ctx.drawImage(im, f * m.fw, 0, srcW, m.fh, -14, -H / 2, len + 30, H);
     ctx.restore();
-    ctx.globalCompositeOperation = 'source-over';
   };
+
+  // =====================================================================
+  //   VẾT BỌT BÁM (lưu lâu, chảy xệ, nhỏ giọt rồi mới mờ)
+  // =====================================================================
+  const Decals = C.Decals = { list: [], screen: [] };
+  /** ent = vật để bám theo (null = bám mặt đất, trôi theo cảnh). f: 0-5 kiểu vết */
+  Decals.add = function (ent, x, y, f, size, life) {
+    const L = Decals.list; if (L.length > 110) L.shift();
+    L.push({ ent, ox: ent ? x - ent.x : x, oy: ent ? y - ent.y : y, f, s: size, life: life || C.rand(5, 8), t: 0, rot: f === 4 ? 0 : C.rand(-0.5, 0.5), sag: 0, dripT: C.rand(0.4, 1.2), vy: 0, free: !ent });
+  };
+  Decals.splatScreen = function () {
+    const S = Decals.screen; if (S.length > 6) S.shift();
+    const side = Math.random() < 0.5;
+    S.push({ x: side ? C.rand(-40, 260) : C.rand(C.W - 260, C.W + 40), y: C.rand(80, C.H - 120), f: C.randi(0, 2), s: C.rand(220, 360), t: 0, life: C.rand(3, 4.5), rot: C.rand(-0.6, 0.6) });
+  };
+  Decals.update = function (dt, scroll) {
+    const L = Decals.list;
+    for (const d of L) {
+      d.t += dt;
+      if (d.ent && (d.ent.dead || d.ent.state === 'gone')) { d.ox += d.ent.x; d.oy += d.ent.y; d.ent = null; d.falling = true; }
+      if (d.falling) { d.vy += 700 * dt; d.oy += d.vy * dt; if (d.oy > C.H - 50) { d.falling = false; d.f = 4; d.oy = C.H - 50; d.rot = 0; d.free = true; } }
+      else { d.sag += dt * (d.f === 4 ? 0 : 5); }
+      if (d.free && !d.falling) d.ox -= scroll * dt;
+      d.dripT -= dt;
+      if (d.dripT <= 0 && d.f !== 4 && d.t < d.life - 1) {
+        d.dripT = C.rand(0.5, 1.5); const p = Decals.pos(d);
+        C.emit({ kind: 'drip', color: 'rgba(250,253,255,0.97)', x: p.x + C.rand(-d.s * 0.25, d.s * 0.25), y: p.y + d.s * 0.3, vy: 30, grav: 420, max: C.rand(0.8, 1.3), s0: C.rand(4, 7), s1: 3, layer: 2, onDie: groundDrop });
+      }
+    }
+    Decals.list = L.filter(d => d.t < d.life && d.ox > -200);
+    for (const s of Decals.screen) { s.t += dt; s.y += 14 * dt; }
+    Decals.screen = Decals.screen.filter(s => s.t < s.life);
+  };
+  Decals.pos = d => d.ent ? { x: d.ent.x + d.ox, y: d.ent.y + d.oy + d.sag } : { x: d.ox, y: d.oy + d.sag };
+  Decals.draw = function (ctx) {
+    for (const d of Decals.list) {
+      const p = Decals.pos(d), a = Math.min(1, (d.life - d.t) / 1.5, d.t * 8);
+      C.spr(ctx, 'foam_decal', d.f, p.x, p.y, d.s * (1 + Math.min(0.15, d.t * 0.03)), { rot: d.rot, alpha: a });
+    }
+  };
+  Decals.drawScreen = function (ctx) {
+    for (const s of Decals.screen) {
+      const a = Math.min(0.85, (s.life - s.t) / 1.2, s.t * 10);
+      C.spr(ctx, 'foam_decal', s.f, s.x, s.y, s.s * (1 + s.t * 0.04), { rot: s.rot, alpha: a });
+    }
+  };
+  Decals.clear = function () { Decals.list = []; Decals.screen = []; };
 })(window.C);
