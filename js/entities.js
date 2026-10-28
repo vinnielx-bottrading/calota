@@ -37,10 +37,14 @@
     // bắn tự động (tạm ngưng khi Siêu phun)
     p.fireCd -= dt;
     if (p.fireCd <= 0 && !g.ultActive && g.state === 'play') {
-      p.fireCd = 0.12;
-      const n = E.nozzle(p);
-      g.bullets.push({ x: n.x + 10, y: n.y - 6, vx: 1150, vy: 0, dmg: 6, r: 8 });
-      if (g.power2) g.bullets.push({ x: n.x + 6, y: n.y - 6, vx: 1100, vy: -120, dmg: 4, r: 7 }, { x: n.x + 6, y: n.y - 6, vx: 1100, vy: 120, dmg: 4, r: 7 });
+      // SÚNG 3 CẤP: nhặt xu để lên cấp, trúng đòn tụt 1 cấp
+      const lv = g.gunLv || 1; p.fireCd = lv === 3 ? 0.085 : 0.09;
+      const n = E.nozzle(p), bx = n.x + 12, by = n.y + 2, V = 1250;
+      const shot = (ang, dmg, r) => g.bullets.push({ x: bx, y: by, vx: Math.cos(ang) * V, vy: Math.sin(ang) * V, dmg, r, lv });
+      shot(0, lv === 3 ? 12 : 10, lv === 3 ? 11 : 9);
+      if (lv >= 2) { shot(-0.09, 6, 8); shot(0.09, 6, 8); }
+      if (lv >= 3) { shot(-0.2, 4, 7); shot(0.2, 4, 7); }
+      C.emit({ kind: 'glow', img: C.G.orange, x: bx, y: by, max: 0.06, s0: 16 + lv * 4, s1: 22 + lv * 4, add: true, layer: 2 });
       C.sfx.play('shoot');
     }
   };
@@ -48,6 +52,7 @@
     const p = g.player;
     if (p.inv > 0 || p.dead || g.ultActive || g.state !== 'play') return false;
     if (p.shield > 0) { p.shield = 0; p.inv = 1; C.sfx.play('shieldBreak'); C.flash(0.3, '#7fd8ff'); for (let i = 0; i < 16; i++) { const a = i / 16 * 6.28; C.emit({ kind: 'glow', img: C.G.teal, x: p.x, y: p.y, vx: Math.cos(a) * 400, vy: Math.sin(a) * 400, drag: 3, max: 0.5, s0: 14, s1: 4, add: true, layer: 2 }); } return true; }
+    if ((g.gunLv || 1) > 1) { g.gunLv--; g.gunXP = 0; g.banner('Súng tụt cấp ' + g.gunLv, 1.2, 'small'); }
     p.hp -= dmg; p.inv = 1.4; p.hurtT = 0.45; C.shake(14); C.flash(0.35, '#ff3b30'); C.sfx.play('hurt');
     p.vx = -500;
     for (let i = 0; i < 6; i++) C.emit({ kind: 'glow', img: C.G.white, x: p.x, y: p.y, vx: C.rand(-300, 300), vy: C.rand(-300, 300), drag: 3, max: 0.4, s0: 10, s1: 2, add: true, layer: 2 });
@@ -78,9 +83,12 @@
   E.drawBullets = function (ctx, g) {
     for (const b of g.bullets) {
       const a = Math.atan2(b.vy, b.vx);
-      ctx.fillStyle = '#ffb21e'; ctx.strokeStyle = '#6a2c00'; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.ellipse(b.x, b.y, 15, 6.5, a, 0, 7); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.ellipse(b.x + 3, b.y - 1.5, 7, 2.5, a, 0, 7); ctx.fill();
+      const k = b.r / 9;
+      ctx.strokeStyle = 'rgba(255,190,60,0.45)'; ctx.lineWidth = 6 * k; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(b.x - Math.cos(a) * 34 * k, b.y - Math.sin(a) * 34 * k); ctx.lineTo(b.x, b.y); ctx.stroke();
+      ctx.fillStyle = b.lv === 3 ? '#ff8a1e' : '#ffb21e'; ctx.strokeStyle = '#6a2c00'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.ellipse(b.x, b.y, 16 * k, 7 * k, a, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff6c0'; ctx.beginPath(); ctx.ellipse(b.x + 3, b.y - 1.5, 7 * k, 2.5 * k, a, 0, 7); ctx.fill();
     }
     for (const b of g.ebullets) {
       if (b.kind === 'spike') C.spr(ctx, 'spikeball', 0, b.x, b.y, b.r * 2.6, { rot: b.rot });
@@ -94,9 +102,9 @@
     o = o || {};
     const e = { type, t: 0, x: o.x || C.W + 120, y: o.y || 360, y0: o.y || 360, hp: 1, maxHp: 1, r: 40, dead: false, flash: 0, corr: 0, ...o };
     switch (type) {
-      case 'beetle': e.hp = 30; e.r = 34; e.w = 96; e.speed = o.speed || 240; e.amp = o.amp == null ? 60 : o.amp; e.freq = o.freq || 3; e.score = 100; break;
-      case 'eagle': e.hp = 80; e.r = 42; e.w = 130; e.speed = 330; e.phase = 'enter'; e.score = 220; break;
-      case 'rock': e.hp = 160; e.r = 52; e.w = 120; e.speed = o.speed || 170; e.rotS = C.rand(-1, 1); e.score = 150; e.solid = true; break;
+      case 'beetle': e.hp = 45; e.r = 34; e.w = 96; e.speed = o.speed || 240; e.amp = o.amp == null ? 60 : o.amp; e.freq = o.freq || 3; e.score = 100; break;
+      case 'eagle': e.hp = 140; e.r = 42; e.w = 130; e.speed = 330; e.phase = 'enter'; e.score = 220; break;
+      case 'rock': e.hp = 260; e.r = 52; e.w = 120; e.speed = o.speed || 170; e.rotS = C.rand(-1, 1); e.score = 150; e.solid = true; break;
       case 'vine': e.hp = 90; e.r = 50; e.w = 150; e.speed = 200; e.sprayOnly = true; e.score = 180; e.solid = true; break;
       case 'pillarTop': e.hp = Infinity; e.w = o.w || 250; e.speed = 200; e.static = true; e.solid = true; e.h = C.sprH('pillar_top', e.w); e.y = e.h / 2 - (o.cut || 30); break;
       case 'pillarBot': e.hp = Infinity; e.w = o.w || 230; e.speed = 200; e.static = true; e.solid = true; e.h = C.sprH('pillar_bottom', e.w); e.y = C.H - e.h / 2 + (o.cut || 30); break;

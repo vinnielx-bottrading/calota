@@ -16,6 +16,7 @@
     g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null;
     C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0;
     g.gauge = fromBoss ? 60 : 20; g.score = fromBoss ? g.checkpointScore || 0 : 0; g.coins = fromBoss ? g.checkpointCoins || 0 : 0; g.kills = 0;
+    g.gunLv = fromBoss ? g.checkpointGun || 2 : 1; g.gunXP = 0;
     g.ultActive = false; g.ultT = 0; g.cutin = 0; C.Chem.power = 0; C.Chem.ult = false;
     g.events = g.gate.timeline(); g.evI = 0; g.t = 0; g.bossT = 0; g.state = 'play'; g.startedAt = performance.now();
     if (fromBoss) { g.t = g.gate.stageTime - 0.5; while (g.evI < g.events.length && g.events[g.evI].t < g.t) g.evI++; g.player.hp = g.player.maxHp; }
@@ -26,11 +27,11 @@
 
   g.banner = function (text, dur, style) { g.banners.push({ text, t: 0, max: dur || 2, style: style || 'hint' }); };
   g.bossWarning = function () {
-    g.banner('⚠ CẢNH BÁO: BOSS ĐANG ĐẾN ⚠', 3.4, 'warn');
+    g.banner('!! CẢNH BÁO: BOSS ĐANG ĐẾN !!', 3.4, 'warn');
     let n = 0; const iv = setInterval(() => { C.sfx.play('warn'); if (++n >= 4) clearInterval(iv); }, 800);
   };
   g.startBoss = function () {
-    g.boss = g.gate.makeBoss(g); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins;
+    g.boss = g.gate.makeBoss(g); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv;
     C.sfx.music('boss'); g.banner(g.gate.bossName, 2.6, 'boss'); C.shake(12);
   };
   g.onBossDefeated = function () {
@@ -49,7 +50,9 @@
   g.addGauge = function (v) { if (!g.ultActive) g.gauge = C.clamp(g.gauge + v, 0, 100); };
   g.pickup = function (it) {
     switch (it.kind) {
-      case 'coin': g.coins++; g.score += 50; C.sfx.play('pickup'); break;
+      case 'coin': g.coins++; g.score += 50; C.sfx.play('pickup');
+        if (g.gunLv < 3 && ++g.gunXP >= (g.gunLv === 1 ? 10 : 18)) { g.gunLv++; g.gunXP = 0; C.sfx.play('shield'); C.flash(0.2, '#ffd34d'); g.banner('SÚNG CẤP ' + g.gunLv + '!', 1.4, 'small'); }
+        break;
       case 'bolt': g.addGauge(45); C.sfx.play('pickup'); C.dmgText(it.x, it.y - 20, 45, '#b6ff3a', 30); g.banner('+ HÓA CHẤT', 0.9, 'small'); break;
       case 'heart': g.player.hp = Math.min(g.player.maxHp, g.player.hp + 1); C.sfx.play('pickup'); break;
       case 'shield': g.player.shield = 1; C.sfx.play('shield'); break;
@@ -168,7 +171,7 @@
         if (!hit) continue;
         b.dead = true;
         if (e.static || e.sprayOnly) { C.emit({ kind: 'glow', img: C.G.orange, x: b.x, y: b.y, max: 0.12, s0: 14, s1: 24, add: true, layer: 2 }); break; }
-        e.hp -= b.dmg; e.flash = 0.06; C.spark(b.x, b.y, 50); g.addGauge(0.5);
+        e.hp -= b.dmg; e.flash = 0.06; if (!e.solid) e.x += 6; C.spark(b.x, b.y, 44 + b.r * 2); g.addGauge(0.5);
         if (e.hp <= 0) killEnemy(e, false); else C.sfx.play('hit');
         break;
       }

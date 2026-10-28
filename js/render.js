@@ -100,6 +100,10 @@
     for (let i = 0; i < p.maxHp; i++) { ctx.globalAlpha = i < p.hp ? 1 : 0.22; C.spr(ctx, 'item_heart', 0, 128 + i * 36, 38, 34); }
     ctx.globalAlpha = 1;
     if (p.shield) C.spr(ctx, 'item_shield', 0, 128 + p.maxHp * 36 + 6, 38, 36);
+    // cấp súng + tiến độ xu lên cấp
+    const gl = g.gunLv || 1, gx = 400, gy = 75;
+    txt(ctx, 'SÚNG CẤP ' + gl + '/3', gx, gy, 16, '#ffd34d', 'left');
+    if (gl < 3) { const need = gl === 1 ? 10 : 18, k2 = Math.min(1, (g.gunXP || 0) / need); ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(gx, gy + 12, 92, 5); ctx.fillStyle = '#ffd34d'; ctx.fillRect(gx, gy + 12, 92 * k2, 5); }
     // thanh hóa chất
     const bx = 112, by = 64, bw = 270, bh = 22, k = g.gauge / 100, full = g.gauge >= 100;
     rr(ctx, bx - 3, by - 3, bw + 6, bh + 6, 13); ctx.fillStyle = '#2a1608'; ctx.fill();

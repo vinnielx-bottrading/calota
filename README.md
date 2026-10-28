@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.5.1
+# CALOTA – Phi Công Hóa Chất · v0.5.2
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -40,6 +40,7 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 | Tạm dừng | `P` / `Esc` | Nút ❚❚ |
 
 ## Cơ chế chính
+- **Súng 3 cấp:** bắn tự động. Cấp 1: 1 tia (10 sát thương, 11 phát/giây). Nhặt 10 xu → **cấp 2** (3 tia). Nhặt thêm 18 xu → **cấp 3** (5 tia, đạn to). Trúng đòn tụt 1 cấp. Đánh lại boss giữ cấp súng lúc gặp boss.
 - **Thanh hóa chất (0–100):** tự hồi 2,5/giây; +0,5 mỗi viên trúng; +6 mỗi quái hạ; +45 khi nhặt ⚡. Phun tốn 22/giây.
 - **Phun thường:** Calota phồng má rồi **phun bọt hóa chất trắng bằng miệng**, tầm 520px; quái nhỏ chìm trong bọt, **nuốt chửng đạn gai** của boss, phá được **dây gai** (đạn thường vô hiệu).
 - **Bọt bám lâu:** vết bọt dính lên boss/quái/cột đá 5–8 giây, chảy xệ và nhỏ giọt; giọt rơi đọng thành vũng dưới đất ~8 giây; Siêu phun văng bọt lên màn hình 3–4 giây.
@@ -49,12 +50,12 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
 
 ## Cửa 1 – Rừng Đá Đảo Trời
 - Đoạn bay ~80 giây: bọ lá, đại bàng bổ nhào, cột đá treo/mọc, đá pha lê, dây gai, vật phẩm.
-- **Boss: Khinh Khí Cầu Gai Rêu** – 18.000 máu (trâu):
+- **Boss: Khinh Khí Cầu Gai Rêu** – 30.000 máu (trâu):
   - GĐ1 (>66%): bắn cầu gai nhắm thẳng, loạt 3 phát.
   - GĐ2 (66–33%): giáp rêu 2.000, bắn tỏa 3, triệu hồi bọ lá.
   - GĐ3 (<33%): giáp rêu 2.600, nổi giận đỏ, bắn tỏa 5, **húc ngang** có vạch đỏ báo trước.
   - Thua khi đang đánh boss → nút **Đánh lại Boss** (không phải bay lại từ đầu).
-- Thử nghiệm bằng bot ngắm hoàn hảo: hạ boss ~65 giây. Người chơi thật ước tính 1,5–2 phút.
+- Bot ngắm hoàn hảo hạ boss: súng cấp 1 ~78s, cấp 2 ~62s, cấp 3 ~45s. Người chơi thật khoảng 1,5–2 phút.
 
 ## Cấu trúc
 ```
@@ -105,6 +106,7 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.5.2** – Súng 3 cấp (nhặt xu lên cấp, trúng đòn tụt cấp), đạn to có vệt sáng, quái bị đẩy lùi khi trúng; máu quái tăng (bọ 45, đại bàng 140, đá 260), boss 30.000. Ảnh lỗi/thiếu không còn được vẽ ra màn hình và được báo trong Console.
 - **0.5.1** – Boss chốt kiểu thùng gỗ: ảnh bị hạ & ngộp bọt mới; boss có hoạt cảnh đau khi vỡ giáp/chuyển giai đoạn và CHOÁNG 1,4s sau Siêu phun. Ảnh boss nằm ở thư mục `Boss/` cạnh `Phun hóa chất/`; khi có `Boss1 Barrel Idle Attack 4x2.png` chạy lại build_assets là boss đổi dáng hoàn toàn. Prompt v8: gói hoạt cảnh G–K.
 - **0.5.0** – Chiêu phun đổi thành bọt trắng phun bằng miệng (ảnh thật), vết bọt bám/đọng lâu, boss ngộp bọt, logo mới ở menu.
 - **0.4.1** – Bảng Ủng hộ VietQR có chọn số tiền; vercel.json; prompt ảnh marketing + công cụ cắt ảnh.

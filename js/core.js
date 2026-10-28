@@ -2,7 +2,7 @@
 window.C = window.C || {};
 (function (C) {
   C.W = 1280; C.H = 720;
-  C.VERSION = '0.5.1';
+  C.VERSION = '0.5.2';
 
   // ---------- tiện ích ----------
   C.rand = (a, b) => a + Math.random() * (b - a);
@@ -45,7 +45,9 @@ window.C = window.C || {};
     const keys = Object.keys(map); let done = 0;
     return Promise.all(keys.map(k => new Promise(res => {
       const im = new Image();
-      im.onload = im.onerror = () => { done++; onProgress && onProgress(done / keys.length); res(); };
+      im.onerror = () => console.warn('[Calota] Thiếu ảnh:', map[k]);
+      const fin = () => { done++; onProgress && onProgress(done / keys.length); res(); };
+      im.addEventListener('load', fin); im.addEventListener('error', fin);
       im.src = map[k]; C.img[k] = im;
     })));
   };
@@ -59,7 +61,7 @@ window.C = window.C || {};
   /** Vẽ frame `f` của sprite `name`, tâm tại (x,y). w = chiều rộng hiển thị. */
   C.spr = function (ctx, name, f, x, y, w, o) {
     const m = C.SPRITES[name], im = C.img[name];
-    if (!m || !im || !im.complete) return;
+    if (!m || !im || !im.complete || !im.naturalWidth) return; // ảnh lỗi/thiếu → bỏ qua, không vẽ khung lỗi
     f = ((f | 0) % m.n + m.n) % m.n;
     const s = w / m.fw, dw = m.fw * s, dh = m.fh * s;
     ctx.save(); ctx.translate(x, y);
@@ -73,7 +75,7 @@ window.C = window.C || {};
   const tintCv = document.createElement('canvas'), tctx = tintCv.getContext('2d');
   C.sprTint = function (ctx, name, f, x, y, w, color, amount, o) {
     const m = C.SPRITES[name], im = C.img[name];
-    if (!m || !im || !im.complete) return;
+    if (!m || !im || !im.complete || !im.naturalWidth) return;
     f = ((f | 0) % m.n + m.n) % m.n;
     if (tintCv.width < m.fw || tintCv.height < m.fh) { tintCv.width = Math.max(tintCv.width, m.fw); tintCv.height = Math.max(tintCv.height, m.fh); }
     tctx.clearRect(0, 0, tintCv.width, tintCv.height);

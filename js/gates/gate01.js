@@ -59,7 +59,7 @@
   // =============================================================
   //   BOSS: KHINH KHÍ CẦU GAI RÊU
   // =============================================================
-  const HP = 18000;
+  const HP = 30000;
   function Airship(g) {
     this.g = g; this.x = C.W + 260; this.y = 340; this.w = 360;
     this.hp = HP; this.maxHp = HP; this.phase = 1;
