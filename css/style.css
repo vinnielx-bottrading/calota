@@ -1,0 +1,70 @@
+:root { --lime: #b6ff3a; --green: #1fa85a; --ink: #2a1608; --cream: #fff6e0; --orange: #ff8a2a; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: #0d1a14; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+body { display: grid; place-items: center; font-family: "Baloo 2", system-ui, sans-serif; color: var(--cream); }
+canvas#game { display: block; background: #123; }
+
+#loading { position: fixed; inset: 0; background: radial-gradient(circle at 50% 40%, #1f6a3f, #0d1a14); display: grid; place-content: center; text-align: center; gap: 16px; z-index: 50; transition: opacity .5s; }
+#loading.gone { opacity: 0; pointer-events: none; }
+#loading .bar { width: min(60vw, 360px); height: 14px; border-radius: 8px; background: #0a2016; border: 3px solid var(--ink); overflow: hidden; }
+#loading .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #2bd67b, var(--lime)); transition: width .2s; }
+
+.logo { font-weight: 800; font-size: clamp(48px, 9vw, 96px); line-height: .9; margin: 0; letter-spacing: 2px;
+  color: #ffd34d; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--ink), 0 0 30px rgba(182,255,58,.6); }
+
+.panel { position: fixed; inset: 0; display: none; place-items: center; z-index: 20; padding: 16px; }
+.panel.on { display: grid; }
+#pause, #win, #lose, #how, #install, #donate { background: rgba(5, 20, 12, .62); }
+.menuBox { text-align: center; display: grid; gap: 12px; justify-items: center; margin-left: 38vw; }
+.tag { margin: 0; font-weight: 600; text-shadow: 0 2px 0 var(--ink); }
+.gateCard { display: flex; gap: 12px; align-items: center; background: rgba(42,22,8,.78); border: 3px solid #ffd34d; border-radius: 16px; padding: 8px 14px 8px 8px; text-align: left; }
+.gateCard img { width: 74px; height: 74px; border-radius: 10px; object-fit: cover; }
+.gateCard b { display: block; color: #ffd34d; font-size: 18px; }
+.gateCard span { display: block; font-size: 20px; font-weight: 800; }
+.gateCard small { opacity: .8; }
+.box { background: rgba(42,22,8,.92); border: 4px solid #ffd34d; border-radius: 20px; padding: 18px 22px; max-width: 620px; max-height: 92vh; overflow: auto; }
+.box.center { text-align: center; }
+.box h2 { margin: 0 0 8px; font-size: 32px; }
+.box ul { padding-left: 20px; line-height: 1.45; }
+.gold { color: #ffd34d; } .red { color: #ff6b5a; }
+.row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+button { font: 800 17px "Baloo 2", system-ui, sans-serif; color: var(--ink); background: var(--cream); border: 3px solid var(--ink); border-radius: 14px; padding: 8px 16px; cursor: pointer; box-shadow: 0 4px 0 var(--ink); }
+button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+button.big { font-size: 24px; padding: 10px 30px; background: linear-gradient(#d9ff6a, #6fe04a); }
+kbd { background: #fff3; border-radius: 5px; padding: 0 6px; font-family: inherit; }
+.best { margin: 0; color: #ffe066; font-weight: 800; }
+.note { opacity: .8; font-size: 14px; }
+.soon { color: var(--lime); font-weight: 800; }
+.stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+.stats div { background: #0006; border-radius: 12px; padding: 6px 14px; min-width: 90px; }
+.stats b { display: block; font-size: 24px; color: #ffd34d; } .stats span { font-size: 13px; opacity: .8; }
+.winImg { width: 190px; margin-top: -60px; filter: drop-shadow(0 6px 0 #0006); }
+.qr { width: 240px; max-width: 70vw; border-radius: 12px; background: #fff; padding: 8px; margin: 8px 0; }
+
+/* nút cảm ứng */
+#touchUI { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+body.touch.playing #touchUI { display: block; }
+.tbtn { position: absolute; pointer-events: auto; border-radius: 50%; padding: 0; font-size: 16px; line-height: 1.05; opacity: .88; touch-action: none; }
+.tbtn.down { transform: scale(.92); opacity: 1; }
+.tbtn.spray { right: calc(24px + env(safe-area-inset-right)); bottom: 28px; width: 112px; height: 112px; font-size: 22px; background: radial-gradient(circle at 40% 35%, #eaff7a, #3ccf5a); }
+.tbtn.ult { right: calc(148px + env(safe-area-inset-right)); bottom: 40px; width: 80px; height: 80px; background: radial-gradient(circle at 40% 35%, #fff, #b6ff3a); }
+.tbtn.dash { right: calc(42px + env(safe-area-inset-right)); bottom: 158px; width: 72px; height: 72px; background: radial-gradient(circle at 40% 35%, #fff, #7fd8ff); }
+.tbtn.small { right: calc(16px + env(safe-area-inset-right)); top: 96px; width: 46px; height: 46px; font-size: 14px; border-radius: 12px; }
+.moveHint { position: absolute; left: 6vw; bottom: 22px; font-weight: 800; opacity: .45; text-shadow: 0 2px 0 #000; }
+#btnPause { display: block; }
+body:not(.touch).playing #touchUI { display: block; }
+body:not(.touch) #touchUI .tbtn:not(.small), body:not(.touch) .moveHint { display: none; }
+
+#rotate { display: none; position: fixed; inset: 0; background: #0d1a14; z-index: 60; place-content: center; text-align: center; font-size: 22px; font-weight: 800; }
+#rotate div { font-size: 72px; animation: spin 2s infinite; }
+body.portrait #rotate { display: grid; }
+@keyframes spin { 50% { transform: rotate(90deg); } }
+
+@media (max-height: 500px) {
+  .menuBox { margin-left: 30vw; gap: 6px; }
+  .logo { font-size: 56px; }
+  .gateCard img { width: 54px; height: 54px; }
+  .box { padding: 12px 16px; } .box h2 { font-size: 24px; }
+  button.big { font-size: 20px; padding: 6px 22px; }
+}

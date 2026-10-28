@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Calota – Phi Công Hóa Chất</title>
+<meta name="description" content="Calota – game bắn boss bay ngang: phun hóa chất ăn mòn, hạ Khinh Khí Cầu Gai Rêu.">
+<meta name="theme-color" content="#1fa85a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:image" content="assets/ui/g1_thumb.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="https://vinhlamgame.vercel.app/vlg.js" data-game="calota" defer></script>
+
+<canvas id="game"></canvas>
+
+<div id="loading"><div class="logo">CALOTA</div><div class="bar"><i id="loadBar"></i></div><p>Đang nạp cánh bay…</p></div>
+
+<!-- nút cảm ứng -->
+<div id="touchUI">
+  <button id="btnPause" class="tbtn small" aria-label="Tạm dừng">❚❚</button>
+  <button id="btnDash" class="tbtn dash">LƯỚT</button>
+  <button id="btnUlt" class="tbtn ult">SIÊU<br>PHUN</button>
+  <button id="btnSpray" class="tbtn spray">PHUN</button>
+  <div class="moveHint">Kéo ở đây để bay</div>
+</div>
+
+<!-- MENU -->
+<section id="menu" class="panel">
+  <div class="menuBox">
+    <h1 class="logo">CALOTA</h1>
+    <p class="tag">Phi công hạt đậu · Phun hóa chất · Hạ boss trâu</p>
+    <div class="gateCard">
+      <img src="assets/ui/g1_thumb.webp" alt="">
+      <div><b>CỬA 1</b><span>Rừng Đá Đảo Trời</span><small>Boss: Khinh Khí Cầu Gai Rêu</small></div>
+    </div>
+    <button id="btnPlay" class="big">▶ BẮT ĐẦU</button>
+    <div class="row">
+      <button id="btnHow">Hướng dẫn</button>
+      <button id="btnInstall">Cài app</button>
+      <button id="btnDonate">Ủng hộ</button>
+      <button class="btnSound">🔊</button>
+    </div>
+    <p id="best" class="best"></p>
+  </div>
+</section>
+
+<section id="how" class="panel">
+  <div class="box">
+    <h2>Cách chơi</h2>
+    <ul>
+      <li><b>Bay:</b> phím mũi tên / WASD · điện thoại: kéo ngón tay ở nửa trái màn hình.</li>
+      <li><b>Bắn:</b> tự động.</li>
+      <li><b>PHUN HÓA CHẤT:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN. Tốn thanh hóa chất, làm quái tan chảy, hòa tan đạn gai và gây <b>Ăn mòn</b> boss (mỗi tầng +8% sát thương, tối đa ×10).</li>
+      <li><b>SIÊU PHUN:</b> thanh đầy → <kbd>K</kbd> hoặc nút SIÊU PHUN. Luồng khổng lồ, bất tử, quét sạch quái nhỏ.</li>
+      <li><b>Lướt:</b> <kbd>Shift</kbd>/<kbd>L</kbd> — né đạn trong chớp mắt.</li>
+      <li><b>Giáp rêu</b> của boss gần như miễn đạn thường — phải dùng hóa chất đốt.</li>
+      <li>Nạp hóa chất: nhặt ⚡, bắn trúng, hạ quái.</li>
+    </ul>
+    <button data-back="menu">Đã hiểu</button>
+  </div>
+</section>
+
+<section id="pause" class="panel">
+  <div class="box center">
+    <h2>Tạm dừng</h2>
+    <button id="btnResume" class="big">Tiếp tục</button>
+    <div class="row"><button class="btnSound">🔊</button><button id="btnQuit">Về menu</button></div>
+  </div>
+</section>
+
+<section id="win" class="panel">
+  <div class="box center">
+    <img class="winImg" src="assets/sprites/calota_win.webp" alt="">
+    <h2 class="gold">CHIẾN THẮNG!</h2>
+    <p>Khinh Khí Cầu Gai Rêu đã tan xác.</p>
+    <div id="winStats" class="stats"></div>
+    <p id="winBest" class="best"></p>
+    <p class="soon">Cửa 2 sắp ra mắt…</p>
+    <div class="row"><button id="btnAgain" class="big">Chơi lại</button><button id="btnMenu1">Menu</button><button id="btnDonate2">Ủng hộ</button></div>
+  </div>
+</section>
+
+<section id="lose" class="panel">
+  <div class="box center">
+    <h2 class="red">CALOTA BỊ HẠ!</h2>
+    <p id="loseInfo"></p>
+    <div class="row"><button id="btnRetryBoss" class="big">Đánh lại Boss</button><button id="btnRetry">Chơi lại từ đầu</button><button id="btnMenu2">Menu</button></div>
+  </div>
+</section>
+
+<section id="install" class="panel">
+  <div class="box">
+    <h2>Cài Calota như app</h2>
+    <ul>
+      <li><b>iPhone (Safari):</b> bấm nút Chia sẻ ⬆ → “Thêm vào MH chính”.</li>
+      <li><b>Android (Chrome):</b> menu ⋮ → “Cài đặt ứng dụng” / “Thêm vào màn hình chính”.</li>
+      <li><b>Máy tính (Chrome/Edge):</b> bấm biểu tượng cài đặt ở cuối thanh địa chỉ.</li>
+    </ul>
+    <p class="note">Game tự cập nhật khi có bản mới.</p>
+    <button data-back="menu">Đóng</button>
+  </div>
+</section>
+
+<section id="donate" class="panel">
+  <div class="box center">
+    <h2>Ủng hộ Vinh làm game</h2>
+    <p>Mỗi ly cà phê giúp Calota có thêm cửa mới ☕</p>
+    <img class="qr" src="assets/ui/donate-qr.png" alt="Mã QR ủng hộ" onerror="this.replaceWith(Object.assign(document.createElement('p'),{className:'note',textContent:'(Thêm ảnh QR vào assets/ui/donate-qr.png)'}))">
+    <button data-back="menu">Đóng</button>
+  </div>
+</section>
+
+<div id="rotate"><div>↻</div><p>Xoay ngang điện thoại để chơi</p></div>
+
+<script src="assets/sprites.js"></script>
+<script src="js/core.js"></script>
+<script src="js/input.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/gates/gate01.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

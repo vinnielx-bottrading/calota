@@ -1,0 +1,194 @@
+{
+ "calota_fly": {
+  "file": "assets/sprites/calota_fly.webp",
+  "fw": 256,
+  "fh": 181,
+  "n": 8,
+  "ax": 161.5,
+  "ay": 30.9
+ },
+ "calota_dash": {
+  "file": "assets/sprites/calota_dash.webp",
+  "fw": 300,
+  "fh": 165,
+  "n": 2,
+  "ax": 201.6,
+  "ay": 49.4
+ },
+ "calota_hurt": {
+  "file": "assets/sprites/calota_hurt.webp",
+  "fw": 256,
+  "fh": 198,
+  "n": 2,
+  "ax": 134.8,
+  "ay": 105.3
+ },
+ "calota_idle": {
+  "file": "assets/sprites/calota_idle.webp",
+  "fw": 256,
+  "fh": 242,
+  "n": 4,
+  "ax": 141.6,
+  "ay": 31.6
+ },
+ "calota_fall": {
+  "file": "assets/sprites/calota_fall.webp",
+  "fw": 300,
+  "fh": 257,
+  "n": 1,
+  "ax": 143.0,
+  "ay": 138.7
+ },
+ "calota_win": {
+  "file": "assets/sprites/calota_win.webp",
+  "fw": 420,
+  "fh": 308,
+  "n": 1,
+  "ax": 213.5,
+  "ay": 142.9
+ },
+ "calota_portrait": {
+  "file": "assets/sprites/calota_portrait.webp",
+  "fw": 320,
+  "fh": 309,
+  "n": 1,
+  "ax": 164.3,
+  "ay": 160.0
+ },
+ "beetle": {
+  "file": "assets/sprites/beetle.webp",
+  "fw": 200,
+  "fh": 178,
+  "n": 4,
+  "ax": 96.2,
+  "ay": 90.8
+ },
+ "eagle": {
+  "file": "assets/sprites/eagle.webp",
+  "fw": 220,
+  "fh": 198,
+  "n": 4,
+  "ax": 114.5,
+  "ay": 107.9
+ },
+ "boss_idle": {
+  "file": "assets/sprites/boss_idle.webp",
+  "fw": 420,
+  "fh": 380,
+  "n": 4,
+  "ax": 238.0,
+  "ay": 199.9
+ },
+ "boss_attack": {
+  "file": "assets/sprites/boss_attack.webp",
+  "fw": 420,
+  "fh": 380,
+  "n": 4,
+  "ax": 238.0,
+  "ay": 199.9
+ },
+ "boss_defeat": {
+  "file": "assets/sprites/boss_defeat.webp",
+  "fw": 418,
+  "fh": 420,
+  "n": 4,
+  "ax": 207.1,
+  "ay": 217.4
+ },
+ "pillar_top": {
+  "file": "assets/sprites/pillar_top.webp",
+  "fw": 455,
+  "fh": 520,
+  "n": 1,
+  "ax": 241.1,
+  "ay": 190.8
+ },
+ "pillar_bottom": {
+  "file": "assets/sprites/pillar_bottom.webp",
+  "fw": 362,
+  "fh": 520,
+  "n": 1,
+  "ax": 184.8,
+  "ay": 285.8
+ },
+ "crystal_rock": {
+  "file": "assets/sprites/crystal_rock.webp",
+  "fw": 194,
+  "fh": 220,
+  "n": 1,
+  "ax": 95.3,
+  "ay": 103.1
+ },
+ "thorn_vine": {
+  "file": "assets/sprites/thorn_vine.webp",
+  "fw": 260,
+  "fh": 183,
+  "n": 1,
+  "ax": 131.2,
+  "ay": 91.3
+ },
+ "item_coin": {
+  "file": "assets/sprites/item_coin.webp",
+  "fw": 128,
+  "fh": 102,
+  "n": 1,
+  "ax": 65.4,
+  "ay": 52.9
+ },
+ "item_shield": {
+  "file": "assets/sprites/item_shield.webp",
+  "fw": 128,
+  "fh": 100,
+  "n": 1,
+  "ax": 60.7,
+  "ay": 49.1
+ },
+ "item_bolt": {
+  "file": "assets/sprites/item_bolt.webp",
+  "fw": 128,
+  "fh": 109,
+  "n": 1,
+  "ax": 68.5,
+  "ay": 52.4
+ },
+ "item_heart": {
+  "file": "assets/sprites/item_heart.webp",
+  "fw": 128,
+  "fh": 96,
+  "n": 1,
+  "ax": 60.0,
+  "ay": 47.0
+ },
+ "spikeball": {
+  "file": "assets/sprites/spikeball.webp",
+  "fw": 128,
+  "fh": 113,
+  "n": 1,
+  "ax": 65.0,
+  "ay": 57.6
+ },
+ "muzzle": {
+  "file": "assets/sprites/muzzle.webp",
+  "fw": 200,
+  "fh": 131,
+  "n": 1,
+  "ax": 71.2,
+  "ay": 67.0
+ },
+ "explosion": {
+  "file": "assets/sprites/explosion.webp",
+  "fw": 300,
+  "fh": 228,
+  "n": 1,
+  "ax": 147.1,
+  "ay": 115.4
+ },
+ "hitspark": {
+  "file": "assets/sprites/hitspark.webp",
+  "fw": 200,
+  "fh": 184,
+  "n": 1,
+  "ax": 98.9,
+  "ay": 87.6
+ }
+}
