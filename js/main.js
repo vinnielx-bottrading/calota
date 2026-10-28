@@ -31,7 +31,7 @@
     $('winText').textContent = g.gate.winText || 'Khinh Khí Cầu Gai Rêu đã tan xác.';
     const hasNext = g.gateIdx + 1 < C.GATES.length;
     $('btnNext').style.display = hasNext ? '' : 'none'; $('winSoon').style.display = hasNext ? 'none' : '';
-    ui.show('win');
+    ui.show('win'); C.sfx.music('win');
     setTimeout(() => { if (g.state === 'win') C.donate.open('end', 'win'); }, 2200);
   };
   ui.showLose = function (r) {
@@ -63,7 +63,7 @@
     $('btnInstall').onclick = () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } else ui.show('install'); };
     renderGates(); $('best').textContent = '';
   }
-  function toMenu() { g.state = 'menu'; C.sfx.hiss(0); C.sfx.music(null); C.particles.length = 0; renderGates(); ui.show('menu'); }
+  function toMenu() { g.state = 'menu'; C.sfx.hiss(0); C.sfx.music('menu'); C.particles.length = 0; renderGates(); ui.show('menu'); }
   function tryFullscreen() {
     if (!('ontouchstart' in window)) return;
     const el = document.documentElement;
@@ -92,7 +92,7 @@
     C.initCanvas(); C.initGlows(); C.input.bindTouch(); bind();
     C.loadImages(C.assetList(), k => { $('loadBar').style.width = Math.round(k * 100) + '%'; }).then(() => {
       $('loading').classList.add('gone');
-      g.state = 'menu'; ui.show('menu');
+      g.state = 'menu'; ui.show('menu'); C.sfx.music('menu');
       let seen = false; try { seen = !!sessionStorage.getItem('calota_dn_start'); sessionStorage.setItem('calota_dn_start', '1'); } catch (e) { }
       if (C.debug.boss || q.has('gate')) g.start(C.debug.gate, C.debug.boss);
       else if (!seen) setTimeout(() => { if (g.state === 'menu') C.donate.open('start', 'menu'); }, 900);

@@ -35,7 +35,7 @@
       }
       for (const b of g.ebullets) { const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 380) { b.vx = dx / d * 500; b.vy = dy / d * 500; } }
       if (g.rageT >= R.CHARGE) {
-        g.ragePhase = 'blast'; g.rageT = 0; C.flash(1, '#ffffff'); C.shake(34); C.sfx.play('explode'); C.sfx.play('ult');
+        g.ragePhase = 'blast'; g.rageT = 0; C.flash(1, '#ffffff'); C.shake(34); C.sfx.play('explode'); if (!C.sfx.sample('sfx_rage_roar', 1.1)) C.sfx.play('ult'); // tiếng RỐNG khi tung chiêu
         g.banner('TUYỆT MỆNH!', 1.8, 'title');
         const m = R.mouth(g);
         C.emit({ kind: 'ring', color: 'rgba(255,255,255,0.95)', x: p.x, y: p.y, max: 0.7, s0: 30, s1: 900, lw: 30, layer: 2 });

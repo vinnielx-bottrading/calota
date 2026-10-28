@@ -216,7 +216,7 @@
     const tx = C.lerp(C.W + 400, 820, Math.min(1, Math.max(0, k * 3 - 0.3))) - k * 30;
     ctx.save(); ctx.translate(tx, C.H / 2); ctx.rotate(-0.12);
     txt(ctx, 'SIÊU PHUN', 0, -40, 92, '#ffffff', 'center', '#0b3a5a');
-    txt(ctx, 'HÓA CHẤT!', 0, 52, 84, '#ffe066', 'center', '#0b3a5a');
+    txt(ctx, 'DỊCH ĐỘC!', 0, 52, 84, '#ffe066', 'center', '#0b3a5a');
     ctx.restore();
   }
 })(window.C);

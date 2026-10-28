@@ -18,6 +18,20 @@ canvas#game { display: block; background: #123; }
 #pause, #win, #lose, #how, #install, #donate { background: rgba(5, 20, 12, .62); }
 .menuBox { text-align: center; display: grid; gap: 12px; justify-items: center; margin-left: 38vw; }
 .tag { margin: 0; font-weight: 600; text-shadow: 0 2px 0 var(--ink); }
+.glowTag { font-weight: 800; font-size: 22px; letter-spacing: .3px; color: #fffbe6;
+  text-shadow: 0 0 2px #2a1608, 0 2px 0 #2a1608, -2px 0 0 #2a1608, 2px 0 0 #2a1608, 0 -2px 0 #2a1608, 0 0 10px #ffd34d, 0 0 22px rgba(255,170,40,.85), 0 0 36px rgba(160,255,80,.55);
+  animation: tagGlow 2.2s ease-in-out infinite; }
+@keyframes tagGlow { 50% { text-shadow: 0 0 2px #2a1608, 0 2px 0 #2a1608, -2px 0 0 #2a1608, 2px 0 0 #2a1608, 0 -2px 0 #2a1608, 0 0 14px #fff2a8, 0 0 30px rgba(255,190,60,1), 0 0 48px rgba(160,255,80,.8); } }
+/* huy hiệu 16+ — cùng chất chữ logo: cam vàng, viền nâu dày, bóng trắng, lắc lư */
+.logoWrap { position: relative; display: inline-block; }
+.age16 { position: absolute; right: -6%; top: -4%; width: clamp(78px, 11vw, 128px); aspect-ratio: 1; display: grid; place-items: center;
+  border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a5c 0 18%, #f0402a 55%, #b3170f 100%);
+  border: 5px solid #2a1608; box-shadow: inset 0 -6px 0 rgba(0,0,0,.25), inset 0 5px 0 rgba(255,255,255,.35), 0 6px 0 rgba(42,22,8,.6), 0 0 0 4px #ffd34d, 0 0 22px rgba(255,90,40,.7);
+  transform-origin: 50% 100%; animation: ageWobble 1.6s ease-in-out infinite; pointer-events: none; }
+.age16 b { font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 800; font-size: clamp(32px, 4.4vw, 52px); line-height: 1; letter-spacing: -1px;
+  background: linear-gradient(#fffbe0 0 30%, #ffd34d 55%, #ff9a1e); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 2px #2a1608; filter: drop-shadow(0 3px 0 #2a1608); }
+@keyframes ageWobble { 0%,100% { transform: rotate(-12deg) scale(1); } 25% { transform: rotate(10deg) scale(1.1); } 50% { transform: rotate(-6deg) scale(.96); } 75% { transform: rotate(8deg) scale(1.06); } }
 .gateList { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .gateCard { display: flex; gap: 12px; align-items: center; background: rgba(42,22,8,.78); border: 3px solid rgba(255,211,77,.35); border-radius: 16px; padding: 8px 14px 8px 8px; text-align: left; color: #fff; font: inherit; cursor: pointer; min-width: 0; opacity: .8; transition: transform .15s, opacity .15s; }
 .gateCard.sel { border-color: #ffd34d; opacity: 1; transform: scale(1.04); box-shadow: 0 0 18px rgba(255,211,77,.45); }
@@ -99,7 +113,7 @@ body.portrait #rotate { display: grid; }
 .logoImg { margin: 0; line-height: 0; }
 .logoImg img, img.logoImg { width: min(46vw, 560px); filter: drop-shadow(0 6px 0 rgba(42,22,8,.6)); }
 #loading img.logoImg { width: min(70vw, 520px); }
-@media (max-height: 500px) { .logoImg img { width: min(40vw, 360px); } }
+@media (max-height: 500px) { .logoImg img { width: min(40vw, 360px); } .glowTag { font-size: 15px; } .age16 { width: 68px; border-width: 4px; } .age16 b { font-size: 28px; } }
 
 .tbtn.rage { right: calc(196px + env(safe-area-inset-right)); bottom: 14px; width: 70px; height: 70px; font-size: 12px; background: radial-gradient(circle at 40% 35%, #fff3c0, #ff7a3a); opacity: .35; }
 .tbtn.rage.ready { opacity: .95; animation: ragePulse .6s infinite alternate; }

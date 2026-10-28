@@ -11,13 +11,20 @@
     ac = new A();
     master = ac.createGain(); master.gain.value = S.on ? 0.9 : 0; master.connect(ac.destination);
     sfxBus = ac.createGain(); sfxBus.gain.value = 0.8; sfxBus.connect(master);
-    musBus = ac.createGain(); musBus.gain.value = 0.22; musBus.connect(master);
+    musBus = ac.createGain(); musBus.gain.value = 0.55; musBus.connect(master);
     noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     return ac;
   }
-  S.unlock = function () { const a = ctx(); if (a && a.state === 'suspended') a.resume(); };
+  S.unlock = function () {
+    const a = ctx(); if (!a) return;
+    if (a.state === 'suspended') a.resume();
+    S.loadSample('sfx_rage_roar');
+    if (S.wantMusic && musicMode !== S.wantMusic) S.music(S.wantMusic); // nhạc menu bật ngay lần chạm đầu tiên
+  };
   S.setOn = function (v) { S.on = v; C.store.set('sound', v); if (master) master.gain.value = v ? 0.9 : 0; };
+  // trình duyệt chặn tự phát nhạc → chạm/bấm phím đầu tiên sẽ mở khóa
+  ['pointerdown', 'keydown', 'touchend'].forEach(ev => window.addEventListener(ev, () => S.unlock(), { passive: true }));
 
   function env(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
   function tone(type, f0, f1, dur, vol, bus) {
@@ -80,26 +87,52 @@
     }
   };
 
-  // ---------- nhạc nền tổng hợp ----------
-  const scale = [0, 3, 5, 7, 10, 12, 15];
+  // ---------- nhạc nền: file mp3 (assets/audio), chuyển bài có fade ----------
+  // mode: 'menu' | 'stage' | 'boss' | 'win' | null
+  const TRACKS = { menu: 'music_menu', stage: 'music_stage', boss: 'music_boss', win: 'music_win' };
+  const VOL = { menu: 0.85, stage: 0.7, boss: 0.75, win: 0.85 };
+  const tracks = {}; let curTrack = null;
+  function track(mode) {
+    if (tracks[mode]) return tracks[mode];
+    const a = ctx(); if (!a) return null;
+    const el = new Audio('assets/audio/' + TRACKS[mode] + '.mp3');
+    el.loop = true; el.preload = 'auto'; el.crossOrigin = 'anonymous';
+    const g = a.createGain(); g.gain.value = 0;
+    try { a.createMediaElementSource(el).connect(g); } catch (e) { }
+    g.connect(musBus);
+    return (tracks[mode] = { el, g });
+  }
   S.music = function (mode) {
+    S.wantMusic = mode;
     if (musicMode === mode) return; musicMode = mode;
-    clearInterval(musicTimer); musicTimer = null;
-    if (!mode) return;
     const a = ctx(); if (!a) return;
-    const boss = mode === 'boss'; const bpm = boss ? 148 : 118; const step = 60 / bpm / 2;
-    const root = boss ? 45 : 50; let i = 0;
-    const prog = boss ? [0, 0, -2, -4] : [0, -4, -7, -2];
-    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-    musicTimer = setInterval(() => {
-      if (!S.on || a.state !== 'running') { i++; return; }
-      const bar = Math.floor(i / 8) % 4, r = root + prog[bar];
-      if (i % 2 === 0) tone('triangle', mtof(r - 12), 0, step * 1.8, boss ? 0.5 : 0.4, musBus);
-      const n = scale[(i * (boss ? 5 : 3) + bar) % scale.length];
-      if (boss || i % 2 === 1) tone(boss ? 'sawtooth' : 'square', mtof(r + 12 + n), 0, step * 0.9, boss ? 0.09 : 0.12, musBus);
-      if (boss && i % 4 === 0) noise(0.08, 0.25, 'lowpass', 300, 60);
-      if (i % 4 === 2) noise(0.04, boss ? 0.12 : 0.07, 'highpass', 6000, 8000);
-      i++;
-    }, step * 1000);
+    const t = a.currentTime;
+    if (curTrack) { // tắt dần bài cũ
+      const old = curTrack; old.g.gain.cancelScheduledValues(t); old.g.gain.setTargetAtTime(0, t, 0.25);
+      setTimeout(() => { if (curTrack !== old) old.el.pause(); }, 1500);
+      curTrack = null;
+    }
+    if (!mode || !TRACKS[mode]) return;
+    const tr = track(mode); if (!tr) return;
+    curTrack = tr;
+    if (mode === 'win' || mode === 'stage') try { tr.el.currentTime = 0; } catch (e) { }
+    tr.g.gain.cancelScheduledValues(t); tr.g.gain.setValueAtTime(tr.g.gain.value, t); tr.g.gain.setTargetAtTime(VOL[mode], t, 0.35);
+    const pr = tr.el.play(); if (pr && pr.catch) pr.catch(() => { musicMode = null; curTrack = null; }); // chưa được phép phát → thử lại khi người chơi chạm
+  };
+  S.musicMode = () => musicMode;
+  document.addEventListener('visibilitychange', () => { if (!ac) return; if (document.hidden) ac.suspend(); else ac.resume(); });
+
+  // ---------- âm thanh dạng file ngắn (nạp sẵn vào bộ nhớ) ----------
+  const bufs = {};
+  S.loadSample = function (name) {
+    const a = ctx(); if (!a || bufs[name]) return;
+    bufs[name] = 'loading';
+    fetch('assets/audio/' + name + '.mp3').then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => a.decodeAudioData(b, res, rej))).then(buf => bufs[name] = buf).catch(() => delete bufs[name]);
+  };
+  S.sample = function (name, vol) {
+    if (!S.on) return; const a = ctx(); const buf = bufs[name];
+    if (!a || !buf || buf === 'loading') { S.loadSample(name); return false; }
+    const s = a.createBufferSource(), g = a.createGain(); s.buffer = buf; g.gain.value = vol || 1;
+    s.connect(g); g.connect(sfxBus); s.start(); return true;
   };
 })(window.C);
