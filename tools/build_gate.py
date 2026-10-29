@@ -49,12 +49,42 @@ def unmult_black(a):
     a[..., :3] = np.clip(rgb / safe, 0, 255)
     return al
 
+def key_magenta(a):
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    d = np.minimum(r, b) - g
+    al = 255 * (1 - np.clip((d - 40) / 90, 0, 1))
+    return al
+
+def key_checker(a):
+    """ảnh mất trong suốt, dính ô caro trắng/xám giả: xóa vùng có 2 tông caro xen kẽ, nối ra mép ảnh"""
+    rgb = a[..., :3]; v = rgb.max(-1); sat = v - rgb.min(-1)
+    neu = (sat < 16) & (v > 196)
+    lo = ndimage.minimum_filter(np.where(neu, v, 0), size=13); hi = ndimage.maximum_filter(np.where(neu, v, 0), size=13)
+    m = neu & (lo > 196) & (lo < 232) & (hi > 240)          # quanh đó có cả ô trắng lẫn ô xám
+    m = ndimage.binary_closing(m, iterations=2) & neu
+    lab, n = ndimage.label(m)
+    border = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    sz = ndimage.sum(m, lab, range(1, n + 1))
+    keep = np.zeros(n + 1, bool)
+    for i in range(1, n + 1):
+        if i in border or sz[i - 1] > 150: keep[i] = True   # lỗ caro kẹt giữa đuôi, cánh…
+    bg = keep[lab]
+    # ăn tiếp viền trắng kiểu sticker + ô caro sót sát nhân vật (chỉ pixel trung tính sáng)
+    for _ in range(9): bg = bg | (ndimage.binary_dilation(bg) & neu)
+    bg = ndimage.binary_dilation(bg, iterations=1)
+    al = np.where(bg, 0, 255).astype(float)
+    return np.array(Image.fromarray(al.astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.7))).astype(float)
+
 def load(path, mode='auto'):
     im = Image.open(path)
     a = np.array(im.convert('RGBA')).astype(float)
     if im.mode == 'RGBA' and (a[..., 3] < 250).mean() > 0.1: return Image.fromarray(a.astype(np.uint8))
+    rgbv = a[..., :3].max(-1); chk = ((rgbv - a[..., :3].min(-1) < 12) & (rgbv > 200)).mean() > 0.3 and im.mode != 'RGBA' or (im.mode == 'RGBA' and (a[..., 3] < 250).mean() < 0.01 and ((rgbv - a[..., :3].min(-1) < 12) & (rgbv > 200)).mean() > 0.3)
     green = ((a[..., 1] > 200) & (a[..., 0] < 70) & (a[..., 2] < 70)).mean() > 0.15
+    magenta = ((a[..., 0] > 200) & (a[..., 2] > 200) & (a[..., 1] < 70)).mean() > 0.15
     if mode == 'glow': al = unmult_black(a)
+    elif chk: al = key_checker(a)
+    elif magenta: al = key_magenta(a)
     elif green: al = key_green(a)
     else: al = key_black(a)
     a[..., 3] = al
@@ -112,9 +142,10 @@ def align(frames, scale, anchor=body_anchor):
 def save(name, frames):
     w, h = frames[0].size; st = Image.new('RGBA', (w * len(frames), h))
     for i, f in enumerate(frames): st.alpha_composite(f, (i * w, 0))
-    st.save(os.path.join(SP, P + name + '.webp'), 'WEBP', quality=88, method=6)
-    meta[P + name] = {'file': f'assets/sprites/{P}{name}.webp', 'fw': w, 'fh': h, 'n': len(frames), 'ax': w / 2, 'ay': h / 2}
-    print(P + name, w, h, len(frames))
+    key = name[1:] if name.startswith('!') else P + name   # '!tên' = asset dùng chung, không gắn tiền tố cửa
+    st.save(os.path.join(SP, key + '.webp'), 'WEBP', quality=88, method=6)
+    meta[key] = {'file': f'assets/sprites/{key}.webp', 'fw': w, 'fh': h, 'n': len(frames), 'ax': w / 2, 'ay': h / 2}
+    print(key, w, h, len(frames))
 
 def sheet(code, name, cols, rows, scale, clean=True, mode='auto', split_rows=None):
     p = find(code)
@@ -125,6 +156,24 @@ def sheet(code, name, cols, rows, scale, clean=True, mode='auto', split_rows=Non
     if split_rows:
         save(name, fr[:cols]); save(name + split_rows, fr[cols:])
     else: save(name, fr)
+
+def strip(code, name, cols, rows, size, mode='auto', clean=True):
+    """sheet các vật rời (hiệu ứng, vết dính) → 1 dải frame cùng khung vuông, mỗi vật căn giữa"""
+    p = find(code)
+    if not p: print('THIẾU', code); return
+    out = []
+    for f in slice_sheet(load(p, mode), cols, rows):
+        if clean: f = main_blob(f)
+        b = f.getchannel('A').getbbox(); f = f.crop(b); f.thumbnail((size - 8, size - 8), Image.LANCZOS)
+        c = Image.new('RGBA', (size, size)); c.alpha_composite(f, ((size - f.width) // 2, (size - f.height) // 2)); out.append(c)
+    save(name, out)
+
+def backgrounds(n):
+    mid = load(find(f'L{n}bm')); mid = mid.resize((1600, round(mid.height * 1600 / mid.width)), Image.LANCZOS); mid.save(os.path.join(BGD, P + 'mid.webp'), quality=85)
+    fg = load(find(f'L{n}fg')); fg = fg.resize((1600, round(fg.height * 1600 / fg.width)), Image.LANCZOS); fg.save(os.path.join(BGD, P + 'fg.webp'), quality=85)
+    far = Image.open(find(f'L{n}bg')).convert('RGB'); far.resize((1600, round(far.height * 1600 / far.width)), Image.LANCZOS).save(os.path.join(BGD, P + 'far.webp'), quality=82)
+    t = Image.open(find(f'L{n}th')).convert('RGB'); t.resize((640, 640), Image.LANCZOS).save(os.path.join(UID, P + 'thumb.webp'), quality=85)
+    print('nền + thumbnail cửa', n)
 
 def singles(code, names, cols, rows, scales, mode='auto', clean=True):
     p = find(code)
@@ -170,6 +219,31 @@ if N == 2:
     # thumbnail tạm từ concept (chờ ảnh L2th)
     th = find('L2th') or find('L2a'); t = Image.open(th).convert('RGBA') if find('L2th') else load(th); c = Image.new('RGBA', (640, 640), (34, 70, 36, 255))
     t.thumbnail((640, 640) if find('L2th') else (620, 620)); c.alpha_composite(t, ((640 - t.width) // 2, (640 - t.height) // 2)); c.convert('RGB').save(os.path.join(UID, P + 'thumb.webp'), quality=85)
+
+if N == 3:
+    sheet('L3b', 'boss_idle', 4, 2, 440, split_rows='_attack')
+    if P + 'boss_idle_attack' in meta:
+        os.replace(os.path.join(SP, P + 'boss_idle_attack.webp'), os.path.join(SP, P + 'boss_attack.webp'))
+        m = meta.pop(P + 'boss_idle_attack'); m['file'] = f'assets/sprites/{P}boss_attack.webp'; meta[P + 'boss_attack'] = m
+    sheet('L3c', 'boss_special', 4, 1, 470, clean=False)   # bổ nhào cào móng
+    sheet('L3d', 'boss_defeat', 4, 1, 440, clean=False)
+    sheet('L3r', 'boss_ram', 4, 1, 470, clean=False)
+    sheet('L3e', 'boss_foam', 2, 1, 440, clean=False)      # (chưa có ảnh đúng)
+    sheet('L3mg', 'lizard', 4, 2, 220, split_rows='_shoot')  # (chưa có ảnh đúng)
+    sheet('L3mh', 'scorpion', 4, 2, 230, split_rows='_shoot')
+    singles('L3ob', ['pillar_top', 'pillar_bottom', 'rock', 'vine'], 2, 2, [520, 520, 220, 300])
+    singles('L3f', ['proj_big', 'bomb', 'muzzle', 'impact'], 2, 2, [190, 190, 230, 260], clean=False)
+    backgrounds(3)
+    # ---- chiêu mới của Calota mở từ cửa 3 (asset dùng chung, không tiền tố) ----
+    sheet('N1', '!calota_venom_on', 3, 1, 300, clean=False)
+    sheet('N2', '!calota_venom_fly', 4, 1, 300, clean=False)
+    strip('N3', '!venom_fx', 3, 2, 200, clean=False)
+    sheet('N4', '!calota_veins', 4, 1, 300, clean=False)   # (chưa có ảnh đúng)
+    sheet('N5', '!calota_loop', 4, 1, 300, clean=False)
+    singles('N6', ['!infinity_ring'], 1, 1, [1200], clean=False)
+    sheet('N7', '!calota_vc_sky', 3, 1, 300, clean=False)
+    strip('N8', '!toxic_explode', 4, 1, 260, clean=False)
+    strip('N9', '!venom_decal', 3, 2, 200, clean=False)
 
 json.dump(meta, open(os.path.join(OUT, 'assets', 'sprites.json'), 'w'), indent=1)
 open(os.path.join(OUT, 'assets', 'sprites.js'), 'w').write('window.C=window.C||{};C.SPRITES=' + json.dumps(meta) + ';\n')

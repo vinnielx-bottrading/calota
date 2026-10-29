@@ -24,11 +24,11 @@
 
       at(0.6, g => g.banner('CỬA 1 · RỪNG ĐÁ ĐẢO TRỜI', 2.6, 'title'));
       beetles(2.5, 220, 5, 40); beetles(5.2, 500, 5, 40);
-      item(7.5, 'bolt', 360); hint(8, C.input.usingTouch ? 'Giữ nút PHUN để xịt hóa chất!' : 'Giữ SPACE / J để PHUN HÓA CHẤT!');
+      item(7.5, 'bolt', 360); hint(8, C.input.usingTouch ? 'Giữ nút PHUN để xịt dịch độc!' : 'Giữ SPACE / J để PHUN DỊCH ĐỘC!');
       coins(9, 360, 6);
       top(10.5); bot(12.8); beetles(13.5, 360, 6, 120);
       eagle(16, 210); eagle(18, 520);
-      at(19.5, g => E.spawn(g, 'vine', { y: 360 })); hint(20, 'Dây gai chỉ cháy bằng HÓA CHẤT');
+      at(19.5, g => E.spawn(g, 'vine', { y: 360 })); hint(20, 'Dây gai chỉ cháy bằng DỊCH ĐỘC');
       at(22.5, g => E.spawn(g, 'rock', { y: 240 })); at(23.6, g => E.spawn(g, 'rock', { y: 500 }));
       item(24.5, 'bolt', 300);
       for (let i = 0; i < 4; i++) { (i % 2 ? bot : top)(26 + i * 2.3); beetles(27 + i * 2.3, i % 2 ? 230 : 500, 3, 30); }
@@ -100,9 +100,20 @@
     this.hurtT = 1.1;
     this.phase = n; this.invT = 1.3; this.shieldMax = this.shield = (n === 2 ? 2000 : 2600) * (this.shieldMul || 1);
     C.shake(20); C.sfx.play('explode'); C.sfx.play('warn');
-    this.g.banner(n === 2 ? (this.txt2 || 'GIÁP RÊU! Xịt HÓA CHẤT để đốt nhanh') : (this.txt3 || 'NỔI GIẬN! Giáp rêu dày hơn'), 2.4, 'boss');
+    this.g.banner(n === 2 ? (this.txt2 || 'GIÁP RÊU! Xịt DỊCH ĐỘC để đốt nhanh') : (this.txt3 || 'NỔI GIẬN! Giáp rêu dày hơn'), 2.4, 'boss');
     for (let i = 0; i < 30; i++) { const a = C.rand(0, 6.28); C.emit({ kind: 'glow', img: C.G.toxic, x: this.x + Math.cos(a) * 160, y: this.y + Math.sin(a) * 160, vx: -Math.cos(a) * 200, vy: -Math.sin(a) * 200, max: 0.8, s0: 40, s1: 10, layer: 2 }); }
     this.state = 'fight'; this.x = Math.max(this.x, 980 + OX());
+    // TIẾP TẾ: boss rơi 1 quả tim khi đổi giai đoạn nếu Calota đang yếu — phải tự lao vào nhặt
+    if (this.g.player.hp <= 3 && !this.g.player.dead) {
+      C.E.drop(this.g, 'heart', this.x - 150, this.y, { vx: -95, wave: true, y0: C.clamp(this.y, 200, 520) });
+      setTimeout(() => this.g.banner('BOSS RƠI TIM! Bay tới nhặt', 1.8, 'hint'), 900);
+    }
+  };
+  /** vào lại boss giữa chừng (Đánh tiếp Boss): frac = phần máu còn lại */
+  B.resumeAt = function (frac) {
+    this.hp = this.maxHp * frac;
+    this.phase = frac <= 0.33 ? 3 : frac <= 0.66 ? 2 : 1;
+    if (this.phase > 1) this.shieldMax = this.shield = (this.phase === 2 ? 2000 : 2600) * (this.shieldMul || 1);
   };
   B.die = function () {
     if (this.state === 'dying') return;
@@ -172,7 +183,7 @@
       if (this.x > 1000 + OX()) { this.ramDizzy = 0.6; this.state = 'fight'; this.chargeT = this.phase === 1 ? 13 : this.phase === 2 ? 10 : 7; }
     }
     // va chạm thân boss
-    if (!p.dead) for (const [cx, cy, r] of this.hitCircles()) if (C.dist2(cx, cy, p.x, p.y) < (r + p.r) * (r + p.r)) { C.E.hurtPlayer(g, 1); break; }
+    if (!p.dead) for (const [cx, cy, r] of this.hitCircles()) if (C.dist2(cx, cy, p.x, p.y) < (r + p.r) * (r + p.r)) { C.Venom.touchBoss(g, this, dt); C.E.hurtPlayer(g, 1); break; }
   };
 
   B.attacks = function (dt) {
@@ -226,7 +237,7 @@
       ctx.strokeStyle = 'rgba(255,80,80,0.9)'; ctx.setLineDash([24, 14]); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, this.y); ctx.lineTo(this.x, this.y); ctx.stroke(); ctx.setLineDash([]);
     }
     if (this.invT > 0 && this.hurtT <= 0 && Math.floor(this.invT * 16) % 2 === 0) C.sprTint(ctx, name, f, X, this.y, W, '#ffffff', 0.6, { rot });
-    else if (this.stacks >= 8 && !ov && st !== 'dying' && this.atkT <= 0 && this.hurtT <= 0 && this.stunT <= 0) C.spr(ctx, 'boss_foam', this.stacks >= 9 ? 1 : 0, this.x, this.y + 10, this.w * 1.08, { rot }); // ngộp trong bọt
+    else if (this.stacks >= 8 && !ov && C.SPRITES[C.skin.boss_foam || 'boss_foam'] && st !== 'dying' && this.atkT <= 0 && this.hurtT <= 0 && this.stunT <= 0) C.spr(ctx, 'boss_foam', this.stacks >= 9 ? 1 : 0, this.x, this.y + 10, this.w * 1.08, { rot }); // ngộp trong bọt
     else if (corr > 0) C.sprTint(ctx, name, f, X, this.y, W, '#f4fbff', 0.05 + corr * 0.12, { rot, blotches: this.blotches.slice(0, Math.ceil(corr * 7)) });
     else if (this.flash > 0) C.sprTint(ctx, name, f, X, this.y, W, '#fff4d0', 0.22, { rot });
     else C.spr(ctx, name, f, X, this.y, W, { rot });

@@ -16,6 +16,10 @@ Khi cần sửa hoặc thay ảnh, chỉ cần đổi file ở đây rồi chạ
 | `00-dung-chung/calota-layer-tach-roi` | Cánh, khăn, ruy băng tách lớp (dự phòng) | — |
 | `00-dung-chung/chieu-phun-bot` | Phun bọt bằng miệng, luồng bọt, tóe bọt, vết bọt bám | `calota_spray`, `foam_stream`, `foam_splash`, `foam_decal` |
 | `00-dung-chung/chieu-tuyet-menh` | Gồng aura + ngửa mặt phun trời | `calota_rage_charge`, `calota_rage_sky` |
+| `00-dung-chung/chieu-giap-noc-doc` | N1 kích hoạt · N2 bay khoác giáp · N3 giọt/vết nọc (mở từ cửa 3) | `calota_venom_on`, `calota_venom_fly`, `venom_fx` |
+| `00-dung-chung/chieu-tuyet-menh-vo-cuc` | N5 bay vòng ∞ · N6 vòng ∞ sáng · N7 ngửa cổ phun · N8 cháy nổ · N9 dịch đọng (từ cửa 3) | `calota_loop`, `infinity_ring`, `calota_vc_sky`, `toxic_explode`, `venom_decal` |
+| `00-dung-chung/hieu-ung-them` | X24 hiệu ứng đạn nọc, X25 hiệu ứng bọt (dự phòng, chưa dùng) | — |
+| `00-dung-chung/_can-gen-lai` | Ảnh gửi nhầm, giữ để tham khảo (SAI-N4) | — |
 | `00-dung-chung/logo-vat-pham-hieu-ung` | Logo, vật phẩm (xu, khiên, sét, tim), hiệu ứng nổ/tia | `logo`, `item_*`, `hitspark`, `muzzle`… |
 | `01-cua1-rung-da-dao-troi/boss-khinh-khi-cau` | Boss thùng gỗ: đứng yên + bắn, lao cụng, bị hạ, ngộp bọt | `boss_*` |
 | `01-cua1-rung-da-dao-troi/quai` | Bọ lá răng nanh, kền kền ống lồng | `beetle*`, `eagle*` |
@@ -26,6 +30,14 @@ Khi cần sửa hoặc thay ảnh, chỉ cần đổi file ở đây rồi chạ
 | `02-cua2-dam-lay-doc/dan-hieu-ung` | L2f đạn, lửa nòng · L2fx giọt độc, vũng độc, tóe, vết cắn | `g2_proj_*`, `g2_muzzle`, `g2_impact`, `g2_venom_*` |
 | `02-cua2-dam-lay-doc/nen-vat-can` | L2bg nền xa · L2bm nền giữa · L2fg lớp gần · L2ob vật cản | `assets/bg/g2_*`, `g2_pillar_*`, `g2_rock`, `g2_vine` |
 | `02-cua2-dam-lay-doc/thumbnail` | L2th ảnh thẻ cửa 2 | `assets/ui/g2_thumb` |
+| `03-cua3-hem-nui-cat-do/boss-ken-ken-chua` | L3a concept · L3b đứng yên + bắn · L3c bổ nhào cào · L3d đau, bị hạ · L3r lao cụng | `g3_boss_*` |
+| `03-cua3-hem-nui-cat-do/dan-hieu-ung` | L3f đạn gai lửa, bom thùng, lửa nòng, nổ đất | `g3_proj_big`, `g3_bomb`, `g3_muzzle`, `g3_impact` |
+| `03-cua3-hem-nui-cat-do/nen-vat-can` | L3bg nền xa · L3bm nền giữa · L3fg lớp gần · L3ob vật cản | `assets/bg/g3_*`, `g3_pillar_*`, `g3_rock`, `g3_vine` |
+| `03-cua3-hem-nui-cat-do/thumbnail` | L3th ảnh thẻ cửa 3 | `assets/ui/g3_thumb` |
+| `03-cua3-hem-nui-cat-do/quai` | L3mg thằn lằn ống phóng · L3mh bọ cạp pháo (nền caro giả, tự tách) | `g3_lizard*`, `g3_scorpion*` |
+| `03-cua3-hem-nui-cat-do/_can-gen-lai` | Ảnh gửi nhầm lần đầu (SAI-…), giữ tham khảo | — |
+
+Thư mục `_can-gen-lai` chứa ảnh không đúng prompt. Tên bắt đầu bằng `SAI-` nên công cụ dựng bỏ qua. Khi có ảnh đúng, đặt vào nhóm tương ứng với tên bắt đầu bằng mã prompt, ví dụ `L3mg Than lan.png`.
 | `90-am-thanh-goc` | Nhạc menu, đoạn bay, đánh boss, thắng; tiếng rống Tuyệt Mệnh (bản gốc 256 kbps) | `assets/audio/*.mp3` |
 | `91-marketing` | Ảnh quảng bá | — |
 
@@ -46,6 +58,9 @@ python tools/build_assets.py --source source .
 
 # cửa 2 (~1 phút) — đổi số và thư mục cho cửa sau
 python tools/build_gate.py source/02-cua2-dam-lay-doc 2 .
+
+# cửa 3 + chiêu mới Giáp Nọc Độc, Tuyệt Mệnh Vô Cực (~2 phút)
+python tools/build_gate.py source 3 .
 ```
 
 Kết quả được ghi vào `assets/sprites/`, `assets/bg/`, `assets/ui/`, cùng `assets/sprites.js` và `sprites.json`.

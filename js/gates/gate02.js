@@ -43,7 +43,7 @@
   Q.constructor = Queen;
   Q.baseHp = R.bossHp;            // 38 000 — trâu hơn cửa 1
   Q.shieldMul = 1.2;
-  Q.txt2 = 'GIÁP LÁ ĐỘC! Xịt HÓA CHẤT để đốt';
+  Q.txt2 = 'GIÁP LÁ ĐỘC! Xịt DỊCH ĐỘC để đốt';
   Q.txt3 = 'ĐIÊN CUỒNG! Phun độc liên tục';
   Q.txtBreak = 'GIÁP LÁ ĐỘC ĐÃ TAN!';
 

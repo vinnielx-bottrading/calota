@@ -464,5 +464,221 @@
   "n": 1,
   "ax": 100.0,
   "ay": 83.0
+ },
+ "g3_boss_idle": {
+  "file": "assets/sprites/g3_boss_idle.webp",
+  "fw": 440,
+  "fh": 422,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 211.0
+ },
+ "g3_boss_attack": {
+  "file": "assets/sprites/g3_boss_attack.webp",
+  "fw": 440,
+  "fh": 422,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 211.0
+ },
+ "g3_boss_special": {
+  "file": "assets/sprites/g3_boss_special.webp",
+  "fw": 362,
+  "fh": 470,
+  "n": 4,
+  "ax": 181.0,
+  "ay": 235.0
+ },
+ "g3_boss_defeat": {
+  "file": "assets/sprites/g3_boss_defeat.webp",
+  "fw": 345,
+  "fh": 440,
+  "n": 4,
+  "ax": 172.5,
+  "ay": 220.0
+ },
+ "g3_boss_ram": {
+  "file": "assets/sprites/g3_boss_ram.webp",
+  "fw": 360,
+  "fh": 470,
+  "n": 4,
+  "ax": 180.0,
+  "ay": 235.0
+ },
+ "g3_pillar_top": {
+  "file": "assets/sprites/g3_pillar_top.webp",
+  "fw": 520,
+  "fh": 465,
+  "n": 1,
+  "ax": 260.0,
+  "ay": 232.5
+ },
+ "g3_pillar_bottom": {
+  "file": "assets/sprites/g3_pillar_bottom.webp",
+  "fw": 520,
+  "fh": 381,
+  "n": 1,
+  "ax": 260.0,
+  "ay": 190.5
+ },
+ "g3_rock": {
+  "file": "assets/sprites/g3_rock.webp",
+  "fw": 220,
+  "fh": 144,
+  "n": 1,
+  "ax": 110.0,
+  "ay": 72.0
+ },
+ "g3_vine": {
+  "file": "assets/sprites/g3_vine.webp",
+  "fw": 300,
+  "fh": 137,
+  "n": 1,
+  "ax": 150.0,
+  "ay": 68.5
+ },
+ "g3_proj_big": {
+  "file": "assets/sprites/g3_proj_big.webp",
+  "fw": 190,
+  "fh": 112,
+  "n": 1,
+  "ax": 95.0,
+  "ay": 56.0
+ },
+ "g3_bomb": {
+  "file": "assets/sprites/g3_bomb.webp",
+  "fw": 190,
+  "fh": 132,
+  "n": 1,
+  "ax": 95.0,
+  "ay": 66.0
+ },
+ "g3_muzzle": {
+  "file": "assets/sprites/g3_muzzle.webp",
+  "fw": 230,
+  "fh": 150,
+  "n": 1,
+  "ax": 115.0,
+  "ay": 75.0
+ },
+ "g3_impact": {
+  "file": "assets/sprites/g3_impact.webp",
+  "fw": 260,
+  "fh": 193,
+  "n": 1,
+  "ax": 130.0,
+  "ay": 96.5
+ },
+ "calota_venom_on": {
+  "file": "assets/sprites/calota_venom_on.webp",
+  "fw": 300,
+  "fh": 290,
+  "n": 3,
+  "ax": 150.0,
+  "ay": 145.0
+ },
+ "calota_venom_fly": {
+  "file": "assets/sprites/calota_venom_fly.webp",
+  "fw": 231,
+  "fh": 300,
+  "n": 4,
+  "ax": 115.5,
+  "ay": 150.0
+ },
+ "venom_fx": {
+  "file": "assets/sprites/venom_fx.webp",
+  "fw": 200,
+  "fh": 200,
+  "n": 6,
+  "ax": 100.0,
+  "ay": 100.0
+ },
+ "calota_loop": {
+  "file": "assets/sprites/calota_loop.webp",
+  "fw": 241,
+  "fh": 300,
+  "n": 4,
+  "ax": 120.5,
+  "ay": 150.0
+ },
+ "infinity_ring": {
+  "file": "assets/sprites/infinity_ring.webp",
+  "fw": 1200,
+  "fh": 510,
+  "n": 1,
+  "ax": 600.0,
+  "ay": 255.0
+ },
+ "calota_vc_sky": {
+  "file": "assets/sprites/calota_vc_sky.webp",
+  "fw": 300,
+  "fh": 297,
+  "n": 3,
+  "ax": 150.0,
+  "ay": 148.5
+ },
+ "toxic_explode": {
+  "file": "assets/sprites/toxic_explode.webp",
+  "fw": 260,
+  "fh": 260,
+  "n": 4,
+  "ax": 130.0,
+  "ay": 130.0
+ },
+ "venom_decal": {
+  "file": "assets/sprites/venom_decal.webp",
+  "fw": 200,
+  "fh": 200,
+  "n": 6,
+  "ax": 100.0,
+  "ay": 100.0
+ },
+ "g3_boss_foam": {
+  "file": "assets/sprites/g3_boss_foam.webp",
+  "fw": 440,
+  "fh": 322,
+  "n": 2,
+  "ax": 220.0,
+  "ay": 161.0
+ },
+ "g3_lizard": {
+  "file": "assets/sprites/g3_lizard.webp",
+  "fw": 220,
+  "fh": 156,
+  "n": 4,
+  "ax": 110.0,
+  "ay": 78.0
+ },
+ "g3_lizard_shoot": {
+  "file": "assets/sprites/g3_lizard_shoot.webp",
+  "fw": 220,
+  "fh": 156,
+  "n": 4,
+  "ax": 110.0,
+  "ay": 78.0
+ },
+ "g3_scorpion": {
+  "file": "assets/sprites/g3_scorpion.webp",
+  "fw": 230,
+  "fh": 181,
+  "n": 4,
+  "ax": 115.0,
+  "ay": 90.5
+ },
+ "g3_scorpion_shoot": {
+  "file": "assets/sprites/g3_scorpion_shoot.webp",
+  "fw": 230,
+  "fh": 181,
+  "n": 4,
+  "ax": 115.0,
+  "ay": 90.5
+ },
+ "calota_veins": {
+  "file": "assets/sprites/calota_veins.webp",
+  "fw": 240,
+  "fh": 300,
+  "n": 4,
+  "ax": 120.0,
+  "ay": 150.0
  }
 }

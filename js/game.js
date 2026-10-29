@@ -11,10 +11,14 @@
     banners: [], ultActive: false, ultT: 0, cutin: 0, bossT: 0, sprayAcc: 0, sprayAccT: 0, checkpoint: false
   };
 
-  g.start = function (gateIdx, fromBoss) {
+  g.RESUMES = 3; // số lần được 'Đánh tiếp Boss' (giữ một phần công đã đánh)
+  /** resume: phần máu boss khi vào lại (null = boss đầy máu) */
+  g.start = function (gateIdx, fromBoss, resume) {
+    g.resumeFrac = resume == null ? null : resume;
+    if (resume == null) g.resumesLeft = g.RESUMES;
     g.gateIdx = gateIdx || 0; g.gate = C.GATES[g.gateIdx]; C.skin = g.gate.skin || {};
     g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null;
-    C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0; C.Rage.reset(g); if (fromBoss) g.rage = 50;
+    C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0; C.Rage.reset(g); C.Venom.reset(g); if (fromBoss) g.rage = 50;
     g.gauge = fromBoss ? 60 : 20; g.score = fromBoss ? g.checkpointScore || 0 : 0; g.coins = fromBoss ? g.checkpointCoins || 0 : 0; g.kills = 0;
     g.gunLv = fromBoss ? g.checkpointGun || 2 : 1; g.gunXP = 0;
     g.ultActive = false; g.ultT = 0; g.cutin = 0; C.Chem.power = 0; C.Chem.ult = false;
@@ -31,7 +35,7 @@
     let n = 0; const iv = setInterval(() => { C.sfx.play('warn'); if (++n >= 4) clearInterval(iv); }, 800);
   };
   g.startBoss = function () {
-    g.boss = g.gate.makeBoss(g); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv;
+    g.boss = g.gate.makeBoss(g); if (g.resumeFrac != null && g.boss.resumeAt) g.boss.resumeAt(g.resumeFrac); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv;
     C.sfx.music('boss'); g.banner(g.gate.bossName, 2.6, 'boss'); C.shake(12);
   };
   g.onBossDefeated = function () {
@@ -146,6 +150,7 @@
     const p = g.player;
     E.updatePlayer(g, dt);
     C.Rage.update(g, dt, rdt);   // CHIÊU TUYỆT MỆNH
+    C.Venom.update(g, dt);       // GIÁP NỌC ĐỘC (cửa 3+)
 
     // ---- Siêu phun ----
     if (I.ultPressed && g.gauge >= 100 && !g.ultActive && !g.rageActive && !p.dead) {
@@ -194,7 +199,8 @@
     for (const b of g.ebullets) {
       if (b.grav) b.vy += b.grav * dt;
       b.x += b.vx * dt; b.y += b.vy * dt; b.rot += b.vr * dt;
-      if (b.grav && b.y > C.H - 50) { b.dead = true; C.emit({ kind: 'img', img: 'g2_venom_puddle', x: b.x, y: C.H - 40 + C.rand(-6, 6), vx: -250, max: 2.2, s0: 70, s1: 110, layer: 1 }); }
+      if (b.grav && b.y > C.H - 50 && b.kind === 'bomb') { b.dead = true; C.explode(b.x, C.H - 70, 170); C.emit({ kind: 'img', img: 'g3_impact', x: b.x, y: C.H - 90, max: 0.5, s0: 160, s1: 260, layer: 2 }); C.sfx.play('explode'); C.shake(8); for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + C.rand(-1.1, 1.1), v = C.rand(320, 520); g.ebullets.push({ kind: 'spike', x: b.x, y: C.H - 70, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 12, rot: 0, vr: 6, hp: 1 }); } }
+      else if (b.grav && b.y > C.H - 50) { b.dead = true; C.emit({ kind: 'img', img: 'g2_venom_puddle', x: b.x, y: C.H - 40 + C.rand(-6, 6), vx: -250, max: 2.2, s0: 70, s1: 110, layer: 1 }); }
       else if (b.x < -60 || b.x > C.W + 80 || b.y < -60 || b.y > C.H + 60) b.dead = true;
       else if (!p.dead && C.dist2(b.x, b.y, p.x, p.y) < (b.r * 0.8 + p.r) * (b.r * 0.8 + p.r)) { if (E.hurtPlayer(g, 1)) { b.dead = true; if (b.kind === 'venom' || b.kind === 'glob') C.emit({ kind: 'img', img: 'g2_venom_splash', x: b.x, y: b.y, max: 0.4, s0: 90, s1: 170, layer: 2 }); else C.explode(b.x, b.y, 110); } }
     }
@@ -205,6 +211,7 @@
       E.updateEnemy(g, e, dt);
       if (e.dead || p.dead) continue;
       for (const [cx, cy, r] of E.circles(e)) if (C.dist2(cx, cy, p.x, p.y) < (r * 0.85 + p.r) * (r * 0.85 + p.r)) {
+        if (C.Venom.touch(g, e, dt)) break; // khoác giáp nọc: quái chạm vào thì quái mất máu
         if (E.hurtPlayer(g, 1) && !e.static && !e.solid) { e.hp = 0; killEnemy(e, false); }
         else if (e.static) { p.y += (p.y < cy ? -1 : 1) * 300 * dt; p.x -= 200 * dt; }
         break;

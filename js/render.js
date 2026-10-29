@@ -143,6 +143,13 @@
     if (rfull) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + 0.4 * Math.sin(now * 9); ctx.drawImage(C.G.orange, bx - 30, ry - 30, 260, 70); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
     txt(ctx, rfull ? (C.input.usingTouch ? 'TUYỆT MỆNH SẴN SÀNG!' : 'TUYỆT MỆNH SẴN SÀNG · [Q]') : 'NỘ', bx + 208, ry + 5, 14, rfull ? '#ffe066' : '#ffb08a', 'left');
     if (rfull && (g.threat || 0) >= 3) txt(ctx, 'BỊ BAO VÂY!', bx, ry + 26, 18, '#ff6b4a', 'left');
+    if (C.Venom.unlocked(g)) { // GIÁP NỌC ĐỘC: hồi chiêu / đang khoác
+      const V = C.Venom, vy = rfull && (g.threat || 0) >= 3 ? ry + 44 : ry + 24, on = g.venomT > 0;
+      const vk = on ? g.venomT / (V.DUR + V.ON) : 1 - (g.venomCD || 0) / V.CD;
+      rr(ctx, bx - 2, vy - 2, 124, 12, 6); ctx.fillStyle = '#2a1608'; ctx.fill();
+      rr(ctx, bx, vy, 120 * C.clamp(vk, 0, 1), 8, 4); ctx.fillStyle = on ? '#b6f23a' : V.ready(g) ? '#7ed321' : '#4f7a2a'; ctx.fill();
+      txt(ctx, on ? 'GIÁP NỌC!' : V.ready(g) ? (C.input.usingTouch ? 'GIÁP NỌC SẴN SÀNG' : 'GIÁP NỌC · [F]') : (g.venomCD > 0 ? 'GIÁP NỌC ' + Math.ceil(g.venomCD) + 's' : 'GIÁP NỌC · cần 35%'), bx + 130, vy + 4, 13, on || V.ready(g) ? '#d8ff7a' : '#9bb58a', 'left');
+    }
     ctx.restore();
     // điểm & xu
     const rx = C.W - 24 - (C.safe ? C.safe.r : 0);

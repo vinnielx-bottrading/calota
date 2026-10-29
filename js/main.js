@@ -3,7 +3,7 @@
   const g = C.game;
   const $ = id => document.getElementById(id);
   const q = new URLSearchParams(location.search);
-  C.debug = { boss: q.has('boss'), ult: q.has('ult'), all: q.has('all'), gate: q.has('gate') ? (+q.get('gate') || 1) - 1 : 0 };
+  C.debug = { venom: q.has('venom'), boss: q.has('boss'), ult: q.has('ult'), all: q.has('all'), gate: q.has('gate') ? (+q.get('gate') || 1) - 1 : 0 };
   let sel = C.store.get('gateSel', 0);
   const unlocked = i => i === 0 || C.debug.all || C.store.get('clear' + C.GATES[i - 1].id, false);
   function renderGates() {
@@ -36,7 +36,14 @@
   };
   ui.showLose = function (r) {
     $('loseInfo').textContent = r.boss ? `Boss còn ${Math.ceil(r.bossHp * 100)}% máu — cố lên!` : 'Calota đã bị hạ giữa đường bay.';
+    // Đánh tiếp: boss vào lại với máu = phần còn + 1/2 phần đã mất (vd. còn 10% → 55%), tối đa 3 lần
+    const left = g.resumesLeft || 0, nf = Math.min(1, r.bossHp + (1 - r.bossHp) / 2);
+    ui.resumeFrac = nf;
+    $('btnResumeBoss').style.display = r.boss && left > 0 ? '' : 'none';
+    $('btnResumeBoss').innerHTML = `Đánh tiếp Boss <small>(boss ${Math.round(nf * 100)}% máu · còn ${left} lượt)</small>`;
     $('btnRetryBoss').style.display = r.boss ? '' : 'none';
+    $('btnRetryBoss').classList.toggle('big', r.boss && left <= 0);
+    if (r.boss && left <= 0) $('loseInfo').textContent += ' Hết lượt đánh tiếp — đánh lại Boss từ đầu nhé!';
     ui.show('lose');
     // khi thua chỉ mời 1 lần mỗi phiên để không phiền
     let dnSeen = true; try { dnSeen = !!sessionStorage.getItem('calota_dn_lose'); sessionStorage.setItem('calota_dn_lose', '1'); } catch (e) { }
@@ -53,6 +60,7 @@
     $('btnQuit').onclick = $('btnMenu1').onclick = $('btnMenu2').onclick = () => toMenu();
     $('btnRetry').onclick = $('btnAgain').onclick = () => g.start(g.gateIdx || 0, false);
     $('btnRetryBoss').onclick = () => g.start(g.gateIdx || 0, true);
+    $('btnResumeBoss').onclick = () => { const left = (g.resumesLeft || 0) - 1; g.start(g.gateIdx || 0, true, ui.resumeFrac); g.resumesLeft = left; };
     const snd = () => { document.querySelectorAll('.btnSound').forEach(b => b.textContent = C.sfx.on ? '🔊' : '🔇'); };
     document.querySelectorAll('.btnSound').forEach(b => b.onclick = () => { C.sfx.unlock(); C.sfx.setOn(!C.sfx.on); snd(); });
     snd();
@@ -83,6 +91,8 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - C.lastT) / 1000); C.lastT = now;
     g.update(dt); C.render(); C.input.endFrame();
+    document.body.classList.toggle('venomOn', g.state === 'play' && C.Venom.unlocked(g));
+    const vb = document.getElementById('btnVenom'); if (vb) { vb.classList.toggle('ready', C.Venom.ready(g)); vb.classList.toggle('on', g.venomT > 0); }
     const rb = document.getElementById('btnRage'); if (rb) rb.classList.toggle('ready', (g.rage || 0) >= 100 && !g.rageActive);
     requestAnimationFrame(frame);
   }

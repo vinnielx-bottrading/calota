@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.8.2
+# CALOTA – Phi Công Hóa Chất · v0.9.1
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -57,7 +57,9 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
   - GĐ2 (66–33%): giáp rêu 2.000, bắn tỏa 3, triệu hồi bọ lá.
   - GĐ3 (<33%): giáp rêu 2.600, nổi giận đỏ, bắn tỏa 5.
   - **Lao tới & cụng** (chiêu chung mọi boss): có vạch đỏ báo trước, dùng ở cả 3 giai đoạn, càng về sau càng dồn dập (13s → 10s → 7s); cụng vào mép trái tạo sóng chấn động.
-  - Thua khi đang đánh boss → nút **Đánh lại Boss** (không phải bay lại từ đầu).
+  - Thua khi đang đánh boss → **Đánh tiếp Boss**: boss vào lại với máu = phần còn + ½ phần đã mất (còn 10% → 55%), tối đa **3 lượt**; hết lượt thì **Đánh lại Boss từ đầu** (boss đầy máu, lượt reset về 3).
+  - **Tiếp tế tim:** khi boss đổi giai đoạn (66%, 33%) mà Calota còn ≤ 3 tim, boss rơi 1 tim trôi lượn sóng — phải tự bay tới nhặt (không hút từ xa).
+  - Còn 1 tim → thanh Nộ nạp **gấp đôi** để lật kèo bằng Tuyệt Mệnh.
 - Bot ngắm hoàn hảo hạ boss: súng cấp 1 ~78s, cấp 2 ~62s, cấp 3 ~45s. Người chơi thật khoảng 1,5–2 phút.
 
 ## Cửa 2 – Đầm Lầy Độc
@@ -69,6 +71,17 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
   - **Cắn nọc** (từ GĐ2): vạch nhắm xanh → lao tới đớp vào chỗ Calota đứng, vãi giọt độc.
   - Lao tới & cụng (chiêu chung), GĐ2+ gọi bầy muỗi, GĐ3 thêm ếch.
 - Quái/vật cản cửa 2 dùng chung logic cửa 1, chỉ đổi hình qua `skin` trong `gate02.js`.
+
+## Cửa 3 – Hẻm Núi Cát Đỏ
+- Mở khi hạ boss cửa 2. Đoạn bay ~130 giây, quái ×1,7 quái: **Thằn Lằn Ống Phóng** (bầy) và **Bọ Cạp Pháo** (quái nặng).
+- **Boss: Kền Kền Chúa Ống Lồng** – 46.000 máu, giáp lông sắt 2.800/3.640:
+  - Nòng lồng bắn đạn gai lửa (loạt 3 → tỏa 3 → tỏa 5), giật lùi mỗi phát.
+  - **Ném bom thùng** (GĐ2+): bom bay vòng cung, chạm đất nổ văng mảnh.
+  - **Bổ nhào cào móng**: vạch nhắm đỏ → lao xuống chỗ Calota, văng mảnh.
+  - Lao tới & cụng, gọi kền kền nhỏ.
+- **Chiêu mới từ cửa 3:**
+  - **GIÁP NỌC ĐỘC** (`F` / nút GIÁP NỌC): tốn 35% Dịch Độc, hồi 14s, khoác 6s. Quái chạm vào thì quái mất máu (Calota không đau), giọt nọc văng ra đốt quái, đọng vũng dưới đất. Đạn và thân boss vẫn gây đau; chạm boss thì đốt boss + cộng Ngộp bọt.
+  - **TUYỆT MỆNH VÔ CỰC** thay Tuyệt Mệnh thường: gồng nổi gân (thế giới chậm lại) → bay vẽ hình ∞ giữa màn hình, vệt sáng cắt quái → ngửa cổ phun dịch độc ×2,5 sát thương, cháy nổ khắp màn hình, xóa đạn → dịch bám màn hình và đọng vũng ~15s, chảy lộp độp. Boss choáng 3s.
 
 ## Tài nguyên gốc
 Toàn bộ ảnh và nhạc gốc nằm trong `source/`, chia theo nhóm (dùng chung, từng cửa, âm thanh, marketing). Xem `source/HUONG_DAN_ASSETS.md`.
@@ -136,6 +149,9 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.9.1** – Đủ ảnh cửa 3: thằn lằn, bọ cạp, Kền Kền Chúa ngộp bọt, Calota gồng nổi gân (gân người). Công cụ dựng tự tách nền caro giả + viền trắng sticker.
+- **0.9.0** – **CỬA 3 HẺM NÚI CÁT ĐỎ** chơi được: boss Kền Kền Chúa Ống Lồng (nòng lồng, bom thùng, bổ nhào cào, lao cụng). Chiêu mới **Giáp Nọc Độc** và **Tuyệt Mệnh Vô Cực**. Vết dịch độc bám lâu. Còn chờ ảnh đúng: N4 gồng gân, L3e ngộp bọt, L3mg thằn lằn, L3mh bọ cạp.
+- **0.8.3** – Boss rơi tim khi đổi giai đoạn (Calota ≤ 3 tim), Nộ ×2 khi còn 1 tim, Đánh tiếp Boss giữ ½ công đã đánh (3 lượt). Prompt N1–N9 cho chiêu cửa 3: Tiết Nọc Nhầy + Tuyệt Mệnh Vô Cực.
 - **0.8.2** – Thanh HUD đổi thành DỊCH ĐỘC. Huy hiệu 16+ dời sang phải, không che logo. Thêm thư mục `source/` chứa toàn bộ ảnh + nhạc gốc chia nhóm, kèm `source/HUONG_DAN_ASSETS.md`; công cụ dựng chạy thẳng từ `source/` (`--source`).
 - **0.8.1** – Nhạc thật cho menu, đoạn bay, đánh boss, màn thắng (assets/audio, chuyển bài có fade, tự bật ở lần chạm đầu tiên). Tiếng RỐNG khi tung Tuyệt Mệnh. Khẩu hiệu mới có viền sáng, huy hiệu 16+ lắc lư, cut-in đổi thành SIÊU PHUN DỊCH ĐỘC. Nền xa + thumbnail cửa 2 bằng ảnh thật.
 - **0.8.0** – **CỬA 2 ĐẦM LẦY ĐỘC** chơi được: boss Bọ Lá Độc Gai Chúa (đạn độc, phun độc quét, cắn nọc, lao tới & cụng), muỗi + ếch độc, nền đầm lầy. Menu chọn cửa (mở khóa theo cửa đã qua), nút Cửa tiếp theo, kỷ lục riêng từng cửa. Sửa lỗi bọ lá cửa 1 bay sai (lọt sang kiểu đại bàng).

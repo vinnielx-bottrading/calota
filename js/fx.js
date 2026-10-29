@@ -172,6 +172,7 @@
   };
   function popBubble(p) { C.emit({ kind: 'ring', color: 'rgba(200,235,255,0.95)', x: p.x, y: p.y, max: 0.15, s0: 3, s1: 14, lw: 3, layer: 2 }); }
   // giọt rơi chạm đất → đọng thành vũng bọt
+  C.venomDrop = p => { if (p.y > C.H - 160 && Math.random() < 0.4) Decals.add(null, C.rand(p.x - 10, p.x + 10), C.H - C.rand(40, 70), 4, C.rand(60, 110), 10, 'venom_decal'); };
   function groundDrop(p) { if (p.y > C.H - 140 && Math.random() < 0.25) Decals.add(null, C.rand(p.x - 10, p.x + 10), C.H - C.rand(40, 70), 4, C.rand(60, 110), 8); }
 
   Chem.splash = function (x, y, k) {
@@ -211,14 +212,14 @@
   // =====================================================================
   const Decals = C.Decals = { list: [], screen: [] };
   /** ent = vật để bám theo (null = bám mặt đất, trôi theo cảnh). f: 0-5 kiểu vết */
-  Decals.add = function (ent, x, y, f, size, life) {
-    const L = Decals.list; if (L.length > 110) L.shift();
-    L.push({ ent, ox: ent ? x - ent.x : x, oy: ent ? y - ent.y : y, f, s: size, life: life || C.rand(5, 8), t: 0, rot: f === 4 ? 0 : C.rand(-0.5, 0.5), sag: 0, dripT: C.rand(0.4, 1.2), vy: 0, free: !ent });
+  Decals.add = function (ent, x, y, f, size, life, spr) {
+    const L = Decals.list; if (L.length > 160) L.shift();
+    L.push({ spr: spr || 'foam_decal', ent, ox: ent ? x - ent.x : x, oy: ent ? y - ent.y : y, f, s: size, life: life || C.rand(5, 8), t: 0, rot: f === 4 ? 0 : C.rand(-0.5, 0.5), sag: 0, dripT: C.rand(0.4, 1.2), vy: 0, free: !ent });
   };
-  Decals.splatScreen = function () {
-    const S = Decals.screen; if (S.length > 6) S.shift();
+  Decals.splatScreen = function (spr, life) {
+    const S = Decals.screen; if (S.length > (spr ? 9 : 6)) S.shift();
     const side = Math.random() < 0.5;
-    S.push({ x: side ? C.rand(-40, 260) : C.rand(C.W - 260, C.W + 40), y: C.rand(80, C.H - 120), f: C.randi(0, 2), s: C.rand(220, 360), t: 0, life: C.rand(3, 4.5), rot: C.rand(-0.6, 0.6) });
+    S.push({ x: spr ? C.rand(0, C.W) : side ? C.rand(-40, 260) : C.rand(C.W - 260, C.W + 40), y: C.rand(spr ? 20 : 80, C.H - 120), f: spr ? C.pick([0, 2, 3, 5]) : C.randi(0, 2), s: spr ? C.rand(130, 230) : C.rand(220, 360), t: 0, life: life || C.rand(3, 4.5), rot: C.rand(-0.6, 0.6), spr: spr || 'foam_decal', dripT: 0.3 });
   };
   Decals.update = function (dt, scroll) {
     const L = Decals.list;
@@ -231,24 +232,30 @@
       d.dripT -= dt;
       if (d.dripT <= 0 && d.f !== 4 && d.t < d.life - 1) {
         d.dripT = C.rand(0.5, 1.5); const p = Decals.pos(d);
-        C.emit({ kind: 'drip', color: 'rgba(250,253,255,0.97)', x: p.x + C.rand(-d.s * 0.25, d.s * 0.25), y: p.y + d.s * 0.3, vy: 30, grav: 420, max: C.rand(0.8, 1.3), s0: C.rand(4, 7), s1: 3, layer: 2, onDie: groundDrop });
+        C.emit({ onDie: d.spr === 'venom_decal' ? C.venomDrop : groundDrop, kind: 'drip', color: d.spr === 'venom_decal' ? 'rgba(170,240,40,0.97)' : 'rgba(250,253,255,0.97)', x: p.x + C.rand(-d.s * 0.25, d.s * 0.25), y: p.y + d.s * 0.3, vy: 30, grav: 420, max: C.rand(0.8, 1.3), s0: C.rand(4, 7), s1: 3, layer: 2 });
       }
     }
     Decals.list = L.filter(d => d.t < d.life && d.ox > -200);
-    for (const s of Decals.screen) { s.t += dt; s.y += 14 * dt; }
+    for (const s of Decals.screen) {
+      s.t += dt; s.y += (s.spr === 'venom_decal' ? 22 : 14) * dt;
+      if (s.spr === 'venom_decal' && (s.dripT -= dt) <= 0 && s.t < s.life - 1) { // dịch trên màn hình nhỏ giọt lộp độp
+        s.dripT = C.rand(0.25, 0.7);
+        C.emit({ kind: 'drip', color: 'rgba(170,240,40,0.95)', x: s.x + C.rand(-s.s * 0.25, s.s * 0.25), y: s.y + s.s * 0.3, vy: 40, grav: 520, max: C.rand(0.9, 1.5), s0: C.rand(5, 9), s1: 3, layer: 3, onDie: C.venomDrop });
+      }
+    }
     Decals.screen = Decals.screen.filter(s => s.t < s.life);
   };
   Decals.pos = d => d.ent ? { x: d.ent.x + d.ox, y: d.ent.y + d.oy + d.sag } : { x: d.ox, y: d.oy + d.sag };
   Decals.draw = function (ctx) {
     for (const d of Decals.list) {
       const p = Decals.pos(d), a = Math.min(1, (d.life - d.t) / 1.5, d.t * 8);
-      C.spr(ctx, 'foam_decal', d.f, p.x, p.y, d.s * (1 + Math.min(0.15, d.t * 0.03)), { rot: d.rot, alpha: a });
+      C.spr(ctx, d.spr, d.f, p.x, p.y, d.s * (1 + Math.min(0.15, d.t * 0.03)), { rot: d.rot, alpha: a });
     }
   };
   Decals.drawScreen = function (ctx) {
     for (const s of Decals.screen) {
-      const a = Math.min(0.85, (s.life - s.t) / 1.2, s.t * 10);
-      C.spr(ctx, 'foam_decal', s.f, s.x, s.y, s.s * (1 + s.t * 0.04), { rot: s.rot, alpha: a });
+      const a = Math.min(s.spr === 'venom_decal' ? 0.62 : 0.85, (s.life - s.t) / 2, s.t * 10);
+      C.spr(ctx, s.spr, s.f, s.x, s.y, s.s * (1 + s.t * 0.04), { rot: s.rot, alpha: a });
     }
   };
   Decals.clear = function () { Decals.list = []; Decals.screen = []; };

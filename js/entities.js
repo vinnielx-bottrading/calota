@@ -64,6 +64,7 @@
   E.drawPlayer = function (ctx, g) {
     const p = g.player;
     if (g.rageActive) { C.Rage.drawCalota(ctx, g); return; }
+    if (C.Venom.draw(ctx, g)) { drawShield(ctx, p); return; }
     if (p.inv > 0 && !p.dead && Math.floor(p.inv * 20) % 2 === 0 && p.hurtT < 0) ctx.globalAlpha = 0.45;
     const tilt = C.clamp(p.vy / 1400, -0.18, 0.22);
     if (p.dead) C.spr(ctx, 'calota_fall', 0, p.x, p.y, 160, { rot: p.deadT * 6 });
@@ -73,14 +74,16 @@
     else if (p.dashT > 0) C.spr(ctx, 'calota_dash', Math.floor(p.anim * 14), p.x - 6, p.y + 2, 172, { rot: tilt });
     else C.spr(ctx, 'calota_fly', Math.floor(p.anim * 16), p.x, p.y, 150, { rot: tilt });
     ctx.globalAlpha = 1;
-    if (p.shield > 0 && !p.dead) {
-      const t = p.anim;
-      ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.5 + 0.15 * Math.sin(t * 8); ctx.drawImage(C.G.teal, p.x - 95, p.y - 95, 190, 190);
-      ctx.strokeStyle = 'rgba(150,230,255,0.85)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, 78 + 3 * Math.sin(t * 6), 0, 7); ctx.stroke();
-      ctx.restore();
-    }
+    drawShield(ctx, p);
   };
+  function drawShield(ctx, p) {
+    if (!(p.shield > 0) || p.dead) return;
+    const t = p.anim;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.5 + 0.15 * Math.sin(t * 8); ctx.drawImage(C.G.teal, p.x - 95, p.y - 95, 190, 190);
+    ctx.strokeStyle = 'rgba(150,230,255,0.85)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y, 78 + 3 * Math.sin(t * 6), 0, 7); ctx.stroke();
+    ctx.restore();
+  }
 
   // ===================== ĐẠN =====================
   E.drawBullets = function (ctx, g) {
@@ -96,6 +99,7 @@
     for (const b of g.ebullets) {
       if (b.kind === 'spike') C.spr(ctx, 'spikeball', 0, b.x, b.y, b.r * 2.6, { rot: b.rot });
       else if (b.kind === 'venom') C.spr(ctx, 'g2_proj_big', 0, b.x, b.y, b.r * 3.6, { rot: Math.atan2(b.vy, b.vx) + Math.PI });
+      else if (b.spr) C.spr(ctx, b.spr, 0, b.x, b.y, b.r * (b.sz || 3.4), { rot: b.face ? Math.atan2(b.vy, b.vx) + Math.PI : b.rot });
       else if (b.kind === 'glob') C.spr(ctx, 'g2_venom_glob', 0, b.x, b.y, b.r * 3.2, { rot: b.rot });
       else { ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(C.G.red, b.x - b.r * 2, b.y - b.r * 2, b.r * 4, b.r * 4); ctx.globalCompositeOperation = 'source-over'; }
     }
@@ -195,12 +199,18 @@
   };
 
   // ===================== VẬT PHẨM =====================
-  E.drop = function (g, kind, x, y) { g.items.push({ kind, x, y, vx: -120, vy: C.rand(-80, 80), t: 0 }); };
+  E.drop = function (g, kind, x, y, o) { const it = { kind, x, y, vx: -120, vy: C.rand(-80, 80), t: 0 }; if (o) Object.assign(it, o); g.items.push(it); return it; };
   E.updateItems = function (g, dt) {
     const p = g.player;
     for (const it of g.items) {
       it.t += dt;
       const d2 = C.dist2(it.x, it.y, p.x, p.y);
+      if (it.wave) { // tim boss rơi: trôi chậm lượn sóng, hút rất ngắn → phải tự bay tới nhặt
+        it.x += it.vx * dt; it.y = it.y0 + Math.sin(it.t * 2.2) * 110;
+        if (d2 < 70 * 70 && !p.dead) { it.taken = true; g.pickup(it); }
+        if (it.x < -80) it.taken = true;
+        continue;
+      }
       if (d2 < 220 * 220 && !p.dead) { const d = Math.sqrt(d2) || 1; it.vx = C.lerp(it.vx, (p.x - it.x) / d * 700, dt * 6); it.vy = C.lerp(it.vy, (p.y - it.y) / d * 700, dt * 6); }
       else { it.vy *= Math.exp(-dt * 2); it.vx = C.lerp(it.vx, -120, dt); }
       it.x += it.vx * dt; it.y += it.vy * dt;
@@ -212,7 +222,8 @@
   E.drawItems = function (ctx, g) {
     const names = { coin: 'item_coin', shield: 'item_shield', bolt: 'item_bolt', heart: 'item_heart' };
     for (const it of g.items) {
-      const s = it.kind === 'coin' ? 42 : 64, bob = Math.sin(it.t * 5) * 4;
+      const s = it.kind === 'coin' ? 42 : it.wave ? 84 + Math.sin(it.t * 8) * 8 : 64, bob = Math.sin(it.t * 5) * 4;
+      if (it.wave) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(it.t * 8); ctx.drawImage(C.G.red, it.x - s * 1.4, it.y - s * 1.4, s * 2.8, s * 2.8); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       if (it.kind !== 'coin') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.45; ctx.drawImage(it.kind === 'bolt' ? C.G.lime : C.G.white, it.x - s, it.y - s + bob, s * 2, s * 2); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       C.spr(ctx, names[it.kind], 0, it.x, it.y + bob, s);
     }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Calota – Phi Công Xúc Xích</title>
+<title>Calota – Phi Công Hóa Chất</title>
 <meta name="description" content="Calota – game bắn boss bay ngang: phun bọt hóa chất bằng miệng, hạ boss trâu qua từng cửa.">
 <meta name="theme-color" content="#1fa85a">
 <link rel="manifest" href="manifest.webmanifest">
@@ -31,6 +31,7 @@
   <button id="btnDash" class="tbtn dash">LƯỚT</button>
   <button id="btnUlt" class="tbtn ult">SIÊU<br>PHUN</button>
   <button id="btnRage" class="tbtn rage">TUYỆT<br>MỆNH</button>
+  <button id="btnVenom" class="tbtn venom">GIÁP<br>NỌC</button>
   <button id="btnSpray" class="tbtn spray">PHUN</button>
   <div class="moveHint">Kéo ở đây để bay</div>
 </div>
@@ -58,9 +59,10 @@
     <ul>
       <li><b>Bay:</b> phím mũi tên / WASD · điện thoại: kéo ngón tay ở nửa trái màn hình.</li>
       <li><b>Bắn:</b> tự động.</li>
-      <li><b>PHUN HÓA CHẤT:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN — Calota phồng má phun luồng bọt trắng bằng miệng. Tốn thanh dịch độc, dìm quái trong bọt, nuốt chửng đạn gai và làm boss <b>Ngộp bọt</b> (mỗi tầng +8% sát thương, tối đa ×10). Bọt bám lại trên boss, cột đá và đọng vũng dưới đất vài giây.</li>
+      <li><b>PHUN DỊCH ĐỘC:</b> giữ <kbd>Space</kbd>/<kbd>J</kbd> hoặc nút PHUN — Calota phồng má phun luồng bọt trắng bằng miệng. Tốn thanh dịch độc, dìm quái trong bọt, nuốt chửng đạn gai và làm boss <b>Ngộp bọt</b> (mỗi tầng +8% sát thương, tối đa ×10). Bọt bám lại trên boss, cột đá và đọng vũng dưới đất vài giây.</li>
       <li><b>SIÊU PHUN DỊCH ĐỘC:</b> thanh đầy → <kbd>K</kbd> hoặc nút SIÊU PHUN. Sóng bọt khổng lồ phủ kín màn hình, bất tử, quét sạch quái nhỏ.</li>
-      <li><b>TUYỆT MỆNH:</b> thanh Nộ đầy (nạp rất nhanh khi bị quái/đạn vây quanh hoặc trúng đòn) → <kbd>Q</kbd> hoặc nút TUYỆT MỆNH. Calota đứng lại gồng aura, ngửa mặt phun cột bọt lên trời, bọt đổ mưa khắp màn hình: quét sạch quái, xóa đạn, boss mất máu lớn và choáng 2,5 giây. Bất tử suốt chiêu.</li>
+      <li><b>TUYỆT MỆNH</b> (từ cửa 3 thành <b>TUYỆT MỆNH VÔ CỰC</b>: bay vẽ hình ∞ rồi phun dịch độc gấp bội): thanh Nộ đầy (nạp rất nhanh khi bị quái/đạn vây quanh hoặc trúng đòn) → <kbd>Q</kbd> hoặc nút TUYỆT MỆNH. Calota đứng lại gồng aura, ngửa mặt phun cột bọt lên trời, bọt đổ mưa khắp màn hình: quét sạch quái, xóa đạn, boss mất máu lớn và choáng 2,5 giây. Bất tử suốt chiêu.</li>
+      <li><b>GIÁP NỌC ĐỘC</b> (từ cửa 3): <kbd>F</kbd> hoặc nút GIÁP NỌC, tốn 35% thanh dịch độc, hồi 14 giây. Calota phủ giáp nọc xanh 6 giây: quái chạm vào thì quái mất máu, giọt nọc văng ra đốt quái và đọng vũng lâu tan. Đạn và cú húc của boss vẫn gây đau.</li>
       <li><b>Lướt:</b> <kbd>Shift</kbd>/<kbd>L</kbd> — né đạn trong chớp mắt.</li>
       <li><b>Giáp rêu</b> của boss gần như miễn đạn thường — phải dùng hóa chất đốt.</li>
       <li>Nạp dịch độc: nhặt ⚡, bắn trúng, hạ quái.</li>
@@ -93,7 +95,7 @@
   <div class="box center">
     <h2 class="red">CALOTA BỊ HẠ!</h2>
     <p id="loseInfo"></p>
-    <div class="row"><button id="btnRetryBoss" class="big">Đánh lại Boss</button><button id="btnRetry">Chơi lại từ đầu</button><button id="btnMenu2">Menu</button><button id="btnDonate3">Ủng hộ</button></div>
+    <div class="row"><button id="btnResumeBoss" class="big">Đánh tiếp Boss</button><button id="btnRetryBoss">Đánh lại Boss từ đầu</button><button id="btnRetry">Chơi lại từ đầu</button><button id="btnMenu2">Menu</button><button id="btnDonate3">Ủng hộ</button></div>
   </div>
 </section>
 
@@ -134,6 +136,8 @@
 <script src="js/gates/gate01.js"></script>
 <script src="js/gates/gate02.js"></script>
 <script src="js/rage.js"></script>
+<script src="js/venom.js"></script>
+<script src="js/gates/gate03.js"></script>
 <script src="js/game.js"></script>
 <script src="js/render.js"></script>
 <script src="js/lib-qrcode.js"></script>
