@@ -1,4 +1,4 @@
-# CALOTA – Phi Công Hóa Chất · v0.9.1
+# CALOTA – Phi Công Hóa Chất · v0.10.0
 
 Game web bay ngang (side-scrolling shooter) đánh boss. Thuộc dự án **Vinh làm game**.
 Calota – phi công hạt đậu có cánh – bắn tự động, **phun hóa chất ăn mòn** và hạ boss trâu.
@@ -83,6 +83,25 @@ Khi phát hành bản mới: tăng `CACHE` trong `sw.js` và `C.VERSION` trong `
   - **GIÁP NỌC ĐỘC** (`F` / nút GIÁP NỌC): tốn 35% Dịch Độc, hồi 14s, khoác 6s. Quái chạm vào thì quái mất máu (Calota không đau), giọt nọc văng ra đốt quái, đọng vũng dưới đất. Đạn và thân boss vẫn gây đau; chạm boss thì đốt boss + cộng Ngộp bọt.
   - **TUYỆT MỆNH VÔ CỰC** thay Tuyệt Mệnh thường: gồng nổi gân (thế giới chậm lại) → bay vẽ hình ∞ giữa màn hình, vệt sáng cắt quái → ngửa cổ phun dịch độc ×2,5 sát thương, cháy nổ khắp màn hình, xóa đạn → dịch bám màn hình và đọng vũng ~15s, chảy lộp độp. Boss choáng 3s.
 
+## Cửa 4 – Đỉnh Băng Tuyết
+- Mở khi hạ boss cửa 3. Đoạn bay ~155 giây, quái ×2,05: **Cánh Cụt Pháo Băng** (bầy), **Cú Tuyết Ống Phóng** (quái nặng).
+- **Boss: Cá Voi Pháo Băng** – 54.000 máu, giáp băng 3.200/4.160:
+  - Đạn băng nhọn (đôi → tỏa 3 → tỏa 5); trúng đạn băng thì Calota **chậm lại** 1,6s.
+  - **Tia băng**: nòng hút băng (vạch báo xanh) → bắn tia ngang quét dần theo Calota; trúng thì đau + chậm 2,5s.
+  - Ném cầu tuyết vòng cung (GĐ2+), lao tới & cụng, gọi cánh cụt.
+- **Tuyệt chiêu HẮC SONG TRÙNG** (thay Tuyệt Mệnh từ cửa 4, phím `Q`): phóng to + aura → tách 2 Calota đen → xoay vòng vẽ ☯ giữa màn hình → 2 bóng đen phun bọt trắng cực đại bằng miệng, quét xoay như cánh quạt, lốc bọt lấp màn hình, quái bị bọc bọt chết ngợp → nhập thân trắng xóa (boss mất 2.600, choáng 3,5s). **Dư âm 8 giây**: 2 bóng đen bay kèm và phun theo khi Calota phun. Bọt + dịch độc bám màn hình, bám cây cỏ, nhỏ giọt lộp độp ~15s.
+
+## Đấu Trường Boss
+- Mở khi hạ boss cửa 4. Chỉ đánh boss: 4 vòng lần lượt từng boss (85% máu) → 2 vòng **hỗn hợp** 2 boss cùng lúc (60% máu mỗi con): Khinh Khí Cầu + Kền Kền, Bọ Lá + Cá Voi.
+- **Gom đủ mọi chiêu**: Phun, Siêu phun (`K`), Giáp nọc (`F`), Tuyệt Mệnh Vô Cực (`Q`), Hắc Song Trùng (`R`). Điện thoại có thêm nút SONG TRÙNG.
+- **Calota trâu**: 8 tim, súng cấp 3 (trúng đòn chỉ tụt về cấp 2), dịch độc nạp ×2, nộ nạp ×1,5.
+- Giữa vòng: hồi 2 tim + rơi sét và khiên. Thua → **Đánh lại vòng này** (không phải đánh lại từ vòng 1).
+
+## HUD gọn
+- Góc trái: chân dung nhỏ (huy hiệu cấp súng + vòng tiến độ lên cấp), tim nhỏ, 3 thanh mảnh: Dịch độc · Nộ · Giáp nọc. Thanh đầy thì viền sáng nhấp nháy + ô phím (K / Q / R / F) thay cho dòng chữ dài.
+- Góc phải: điểm + xu. Giữa trên: máu boss mảnh (2 thanh cạnh nhau khi có 2 boss), Ngộp bọt là huy hiệu ×n.
+- Điện thoại: HUD tự phóng to 1,35 lần cho dễ đọc; menu thẻ cửa thành 1 hàng cuộn ngang.
+
 ## Tài nguyên gốc
 Toàn bộ ảnh và nhạc gốc nằm trong `source/`, chia theo nhóm (dùng chung, từng cửa, âm thanh, marketing). Xem `source/HUONG_DAN_ASSETS.md`.
 
@@ -97,6 +116,12 @@ js/fx.js              hạt, rung, chữ sát thương, HỆ THỐNG PHUN HÓA C
 js/entities.js        Calota, đạn, quái, vật cản, vật phẩm
 js/gates/gate01.js    kịch bản Cửa 1 + boss Khinh Khí Cầu Gai Rêu (khung boss dùng chung)
 js/gates/gate02.js    Cửa 2 Đầm Lầy Độc + boss Bọ Lá Độc Gai Chúa
+js/gates/gate03.js    Cửa 3 Hẻm Núi Cát Đỏ + boss Kền Kền Chúa Ống Lồng
+js/gates/gate04.js    Cửa 4 Đỉnh Băng Tuyết + boss Cá Voi Pháo Băng
+js/gates/arena.js     Đấu Trường Boss (nhiều vòng, nhiều boss cùng lúc)
+js/venom.js           Giáp Nọc Độc
+js/songtrung.js       Tuyệt chiêu Hắc Song Trùng
+js/rage.js            Tuyệt Mệnh (thường / Vô Cực) + chọn chế độ tuyệt chiêu
 tools/build_gate.py   cắt ảnh cửa 2+ (thư mục CuaN, tên file bắt đầu bằng mã prompt)
 js/game.js            vòng lặp, va chạm, phun, Siêu phun
 js/render.js          vẽ cảnh, HUD, cut-in
@@ -149,6 +174,7 @@ Cắt đúng kích thước: `python tools/marketing_crop.py <ảnh> slide|kv|th
 Cài được như app (nút **Cài app** có hướng dẫn iPhone/Android/máy tính). Service worker network-first nên game **tự cập nhật âm thầm** khi có bản mới; khi phát hành nhớ tăng `CACHE` trong `sw.js` và `C.VERSION` trong `js/core.js`.
 
 ## Nhật ký
+- **0.10.0** – **CỬA 4 ĐỈNH BĂNG TUYẾT** (boss Cá Voi Pháo Băng: tia băng làm chậm, cầu tuyết; cánh cụt + cú tuyết). Tuyệt chiêu **Hắc Song Trùng**. **Đấu Trường Boss** (6 vòng, có vòng 2 boss cùng lúc, đủ mọi chiêu, Calota 8 tim). **HUD gọn** + menu cuộn ngang trên điện thoại. Hỗ trợ nhiều boss cùng lúc trong code.
 - **0.9.1** – Đủ ảnh cửa 3: thằn lằn, bọ cạp, Kền Kền Chúa ngộp bọt, Calota gồng nổi gân (gân người). Công cụ dựng tự tách nền caro giả + viền trắng sticker.
 - **0.9.0** – **CỬA 3 HẺM NÚI CÁT ĐỎ** chơi được: boss Kền Kền Chúa Ống Lồng (nòng lồng, bom thùng, bổ nhào cào, lao cụng). Chiêu mới **Giáp Nọc Độc** và **Tuyệt Mệnh Vô Cực**. Vết dịch độc bám lâu. Còn chờ ảnh đúng: N4 gồng gân, L3e ngộp bọt, L3mg thằn lằn, L3mh bọ cạp.
 - **0.8.3** – Boss rơi tim khi đổi giai đoạn (Calota ≤ 3 tim), Nộ ×2 khi còn 1 tim, Đánh tiếp Boss giữ ½ công đã đánh (3 lượt). Prompt N1–N9 cho chiêu cửa 3: Tiết Nọc Nhầy + Tuyệt Mệnh Vô Cực.

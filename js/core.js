@@ -2,12 +2,14 @@
 window.C = window.C || {};
 (function (C) {
   C.W = 1280; C.H = 720;
-  C.VERSION = '0.9.1';
+  C.VERSION = '0.10.0';
   C.skin = {}; // đổi tên sprite theo cửa (vd. beetle → g2_mosq)
 
   // ---------- tiện ích ----------
   C.rand = (a, b) => a + Math.random() * (b - a);
   C.randi = (a, b) => Math.floor(C.rand(a, b + 1));
+  /** mọi boss đang có mặt (Đấu trường Boss có thể có 2 con cùng lúc) */
+  C.bossList = g => (g.bosses && g.bosses.length ? g.bosses : g.boss ? [g.boss] : []);
   C.pick = arr => arr[Math.floor(Math.random() * arr.length)];
   C.clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   C.lerp = (a, b, t) => a + (b - a) * t;
@@ -62,7 +64,7 @@ window.C = window.C || {};
     const m = {};
     for (const k in C.SPRITES) m[k] = C.SPRITES[k].file;
     m.bg_far = 'assets/bg/g1_far.webp'; m.bg_mid = 'assets/bg/g1_mid.webp'; m.bg_fg = 'assets/bg/g1_fg.webp';
-    for (const n of [2, 3]) for (const l of ['far', 'mid', 'fg']) m[`g${n}_${l}`] = `assets/bg/g${n}_${l}.webp`;
+    for (const n of [2, 3, 4]) for (const l of ['far', 'mid', 'fg']) m[`g${n}_${l}`] = `assets/bg/g${n}_${l}.webp`;
     return m;
   };
 

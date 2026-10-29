@@ -125,7 +125,7 @@
         for (let i = 0; i < (this.phase === 3 ? 10 : 6); i++) { const aa = Math.PI + C.rand(-1.2, 1.2), vv = C.rand(250, 420); g.ebullets.push({ kind: 'glob', x: m2.x, y: m2.y, vx: Math.cos(aa) * vv, vy: Math.sin(aa) * vv - 120, grav: 380, r: 13, rot: 0, vr: 3, hp: 1 }); }
       }
     } else if (st === 'biteBack') {      // lùi về chỗ cũ
-      const hx = 1010 + OX();
+      const hx = 1010 + this.ox();
       this.x = Math.min(hx, this.x + 650 * dt);
       if (this.x >= hx - 2) { this.state = 'fight'; this.t = 0; this.snapped = false; }
     }

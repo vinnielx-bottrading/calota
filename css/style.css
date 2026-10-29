@@ -116,6 +116,9 @@ body.portrait #rotate { display: grid; }
 @media (max-height: 500px) { .logoImg img { width: min(40vw, 360px); } .glowTag { font-size: 15px; } .age16 { width: 68px; border-width: 4px; } .age16 b { font-size: 28px; } }
 
 .tbtn.rage { right: calc(196px + env(safe-area-inset-right)); bottom: 14px; width: 70px; height: 70px; font-size: 12px; background: radial-gradient(circle at 40% 35%, #fff3c0, #ff7a3a); opacity: .35; }
+.tbtn.rage2 { display: none; right: calc(274px + env(safe-area-inset-right)); bottom: 14px; width: 66px; height: 66px; font-size: 11px; color: #fff; background: radial-gradient(circle at 40% 35%, #c9a6ff, #2a0a45); opacity: .35; }
+body.rush .tbtn.rage2 { display: block; }
+.tbtn.rage2.ready { opacity: .95; animation: ragePulse .6s infinite alternate; }
 .tbtn.venom { display: none; right: calc(196px + env(safe-area-inset-right)); bottom: 92px; width: 64px; height: 64px; font-size: 11px; background: radial-gradient(circle at 40% 35%, #f4ffd0, #7ed321); opacity: .4; }
 body.venomOn .tbtn.venom { display: block; }
 .tbtn.venom.ready { opacity: .95; }
@@ -123,3 +126,13 @@ body.venomOn .tbtn.venom { display: block; }
 .tbtn.rage.ready { opacity: .95; animation: ragePulse .6s infinite alternate; }
 @keyframes ragePulse { to { transform: scale(1.1); box-shadow: 0 0 22px #ffb84a, 0 4px 0 var(--ink); } }
 #btnResumeBoss small { display: block; font-size: 13px; font-weight: 600; opacity: .85; }
+/* menu điện thoại: thẻ cửa thành 1 hàng cuộn ngang, gọn */
+@media (max-height: 500px) {
+  .gateList { flex-wrap: nowrap; overflow-x: auto; max-width: 64vw; justify-content: flex-start; padding: 6px 4px; scrollbar-width: none; }
+  .gateList::-webkit-scrollbar { display: none; }
+  .gateCard { flex: 0 0 auto; padding: 4px 10px 4px 4px; gap: 8px; }
+  .gateCard small { display: none; }
+  .gateCard img { width: 40px !important; height: 40px !important; }
+  .gateCard b { font-size: 13px; } .gateCard span { font-size: 14px !important; }
+  .gateCard.sel { transform: scale(1.02); }
+}

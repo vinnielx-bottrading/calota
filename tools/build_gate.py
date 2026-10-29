@@ -245,6 +245,30 @@ if N == 3:
     strip('N8', '!toxic_explode', 4, 1, 260, clean=False)
     strip('N9', '!venom_decal', 3, 2, 200, clean=False)
 
+if N == 4:
+    sheet('L4b', 'boss_idle', 4, 2, 440, split_rows='_attack')
+    if P + 'boss_idle_attack' in meta:
+        os.replace(os.path.join(SP, P + 'boss_idle_attack.webp'), os.path.join(SP, P + 'boss_attack.webp'))
+        m = meta.pop(P + 'boss_idle_attack'); m['file'] = f'assets/sprites/{P}boss_attack.webp'; meta[P + 'boss_attack'] = m
+    sheet('L4c', 'boss_special', 4, 1, 500, clean=False)   # nòng hút băng → tia băng
+    sheet('L4d', 'boss_defeat', 4, 1, 440, clean=False)
+    sheet('L4r', 'boss_ram', 4, 1, 480, clean=False)
+    sheet('L4e', 'boss_foam', 2, 1, 460, clean=False)
+    sheet('L4mg', 'penguin', 4, 2, 220, split_rows='_shoot')
+    sheet('L4mh', 'owl', 4, 2, 230, split_rows='_shoot')
+    singles('L4ob', ['pillar_top', 'pillar_bottom', 'rock', 'vine'], 2, 2, [520, 520, 220, 320])
+    singles('L4f', ['proj_big', 'snowball', 'muzzle', 'impact'], 2, 2, [200, 200, 240, 260], clean=False)
+    backgrounds(4)
+    # ---- tuyệt chiêu HẮC SONG TRÙNG (dùng chung, mở từ cửa 4) ----
+    sheet('O1', '!calota_st_grow', 4, 1, 320, clean=False)
+    sheet('O2', '!calota_st_split', 4, 1, 360, clean=False)
+    sheet('O3', '!shadow_fly', 4, 1, 300, clean=False)
+    sheet('O4', '!shadow_spray', 3, 1, 340, clean=False)
+    singles('O5', ['!yinyang'], 1, 1, [900], clean=False)
+    strip('O6', '!foam_vortex', 4, 1, 300, clean=False)
+    strip('O7', '!foam_trap', 4, 1, 220, clean=False)
+    strip('O8', '!scene_goo', 3, 2, 220, clean=False)
+
 json.dump(meta, open(os.path.join(OUT, 'assets', 'sprites.json'), 'w'), indent=1)
 open(os.path.join(OUT, 'assets', 'sprites.js'), 'w').write('window.C=window.C||{};C.SPRITES=' + json.dumps(meta) + ';\n')
 print('xong')

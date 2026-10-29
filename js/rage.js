@@ -4,7 +4,11 @@
 (function (C) {
   const R = C.Rage = { CHARGE: 1.1, BLAST: 3.4, LOOP: 1.7, BLAST_VC: 4.2 };
   /** từ cửa 3: TUYỆT MỆNH VÔ CỰC — gồng nổi gân → bay hình ∞ → ngửa cổ phun dịch độc gấp bội + cháy nổ */
-  R.vc = g => !!(g.gate && g.gate.id >= 3);
+  /** chế độ tuyệt chiêu theo cửa: base (cửa 1–2) · vc = Vô Cực (cửa 3) · st = Hắc Song Trùng (cửa 4+). Đấu trường Boss: chọn bằng phím */
+  R.defMode = g => (g.gate && g.gate.rageMode) || (g.gate && g.gate.id >= 4 ? 'st' : g.gate && g.gate.id >= 3 ? 'vc' : 'base');
+  R.mode = g => g.rageActive ? g.rageMode : R.defMode(g);
+  R.vc = g => R.mode(g) === 'vc';
+  R.st = g => R.mode(g) === 'st';
   const E = C.E;
 
   R.reset = function (g) { g.rage = 0; g.rageActive = false; g.rageT = 0; g.ragePhase = null; g.rageTick = 0; };
@@ -14,7 +18,7 @@
     const p = g.player; let n = 0;
     for (const e of g.enemies) if (!e.static && !e.dead && C.dist2(e.x, e.y, p.x, p.y) < 330 * 330) n++;
     for (const b of g.ebullets) if (C.dist2(b.x, b.y, p.x, p.y) < 260 * 260) n++;
-    if (g.boss && g.boss.state !== 'dying' && C.dist2(g.boss.x, g.boss.y, p.x, p.y) < 420 * 420) n += 2;
+    for (const B of C.bossList(g)) if (B.state !== 'dying' && C.dist2(B.x, B.y, p.x, p.y) < 420 * 420) n += 2;
     return n;
   };
   R.add = function (g, v) { if (!g.rageActive) g.rage = C.clamp((g.rage || 0) + v, 0, 100); };
@@ -23,8 +27,11 @@
     const p = g.player, I = C.input;
     if (!g.rageActive) {
       g.threat = R.threat(g);
-      R.add(g, dt * (0.6 + g.threat * 2.2) * (g.player.hp <= 1 ? 2 : 1)); // còn 1 tim → Nộ nạp gấp đôi // càng bị vây càng nạp nhanh
-      if (I.ragePressed && g.rage >= 100 && !p.dead && !g.ultActive) R.start(g);
+      R.add(g, dt * (0.6 + g.threat * 2.2) * (g.player.hp <= 1 ? 2 : 1) * (g.gate.rageMul || 1)); // còn 1 tim → Nộ nạp gấp đôi // càng bị vây càng nạp nhanh
+      if (g.rage >= 100 && !p.dead && !g.ultActive) {
+        if (I.ragePressed) R.start(g, g.gate && g.gate.allSkills ? 'vc' : R.defMode(g));
+        else if (I.rage2Pressed && g.gate && g.gate.allSkills) R.start(g, 'st'); // Đấu trường: phím R = Hắc Song Trùng
+      }
       return;
     }
     g.rageT += rdt;
@@ -36,7 +43,8 @@
         C.emit({ kind: 'blob', color: '#ffffff', edge: '#6fa3c8', x: p.x + Math.cos(a) * d, y: p.y + Math.sin(a) * d, vx: -Math.cos(a) * d * 2.4, vy: -Math.sin(a) * d * 2.4, max: 0.4, s0: C.rand(4, 9), s1: 2, layer: 2 });
       }
       for (const b of g.ebullets) { const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy) || 1; if (d < 380) { b.vx = dx / d * 500; b.vy = dy / d * 500; } }
-      if (g.rageT >= R.CHARGE && R.vc(g)) {
+      if (g.rageT >= R.CHARGE && R.st(g)) { C.ST.begin(g); }
+      else if (g.rageT >= R.CHARGE && R.vc(g)) {
         g.ragePhase = 'loop'; g.rageT = 0; g.vcPts = []; g.vcFrom = { x: p.x, y: p.y }; g.vcBossT = 0;
         for (const e of g.enemies) e._vc = false;
         C.flash(0.5, '#d8ff7a'); C.shake(20); C.sfx.play('dash'); C.sfx.play('ult');
@@ -50,6 +58,8 @@
         for (let i = 0; i < 6; i++) setTimeout(() => C.Decals.splatScreen(), 150 + i * 380);
         g.ebullets.length = 0;
       }
+    } else if (R.st(g)) {
+      C.ST.update(g, rdt);
     } else if (g.ragePhase === 'loop') {
       R.updateLoop(g, rdt);
     } else if (R.vc(g)) {
@@ -75,8 +85,7 @@
           C.Decals.add(e, e.x + C.rand(-20, 20), e.y + C.rand(-20, 20), C.randi(0, 3), C.rand(50, 90));
           if (e.hp <= 0) g.killEnemy(e, true);
         }
-        const B = g.boss;
-        if (B && B.state !== 'dying' && B.state !== 'enter') {
+        for (const B of C.bossList(g)) if (B.state !== 'dying' && B.state !== 'enter') {
           const d = B.damage(190, 'ult'); B.stacks = 10; B.sprayedT = 0;
           if (d) C.dmgText(B.x, B.y - 120, d, '#fff6a0', 46);
           C.Decals.add(B, B.x + C.rand(-150, 150), B.y + C.rand(-120, 120), C.randi(0, 3), C.rand(90, 160), 9);
@@ -85,7 +94,7 @@
       }
       if (g.rageT >= R.BLAST) {
         g.rageActive = false; g.ragePhase = null; g.rage = 0; g.player.inv = 1.2;
-        if (g.boss && g.boss.state === 'fight') { g.boss.stunT = 2.5; g.banner('BOSS NGỘP BỌT — CHOÁNG!', 1.6, 'boss'); }
+        if (C.bossList(g).some(B => B.state === 'fight')) { C.bossList(g).forEach(B => { if (B.state === 'fight') B.stunT = 2.5; }); g.banner('BOSS NGỘP BỌT — CHOÁNG!', 1.6, 'boss'); }
       }
     }
   };
@@ -109,9 +118,8 @@
       if (e.hp <= 0) g.killEnemy(e, true);
     }
     for (const b of g.ebullets) if (C.dist2(b.x, b.y, p.x, p.y) < 140 * 140) b.dead = true;
-    const B = g.boss; g.vcBossT -= dt;
-    if (B && B.state !== 'dying' && B.state !== 'enter' && g.vcBossT <= 0) for (const [cx, cy, r] of B.hitCircles()) if (C.dist2(cx, cy, p.x, p.y) < (r + 70) * (r + 70)) {
-      g.vcBossT = 0.3; const d = B.damage(600, 'ult'); if (d) C.dmgText(B.x, B.y - 120, d, '#d8ff7a', 44); break;
+    g.vcBossT -= dt; if (g.vcBossT <= 0) for (const B of C.bossList(g)) if (B.state !== 'dying' && B.state !== 'enter') for (const [cx, cy, r] of B.hitCircles()) if (C.dist2(cx, cy, p.x, p.y) < (r + 70) * (r + 70)) {
+      B._vcT = 0.3; g.vcBossT = 0.3; const d = B.damage(600, 'ult'); if (d) C.dmgText(B.x, B.y - 120, d, '#d8ff7a', 44); break;
     }
     if (g.rageT >= R.LOOP) { // về giữa vòng ∞, ngửa cổ phun
       g.ragePhase = 'blast'; g.rageT = 0; g.vcFrom = { x: p.x, y: p.y };
@@ -149,8 +157,7 @@
         C.Decals.add(e, e.x + C.rand(-20, 20), e.y + C.rand(-20, 20), C.pick([0, 2, 3, 5]), C.rand(50, 90), 14, 'venom_decal');
         if (e.hp <= 0) g.killEnemy(e, true);
       }
-      const B = g.boss;
-      if (B && B.state !== 'dying' && B.state !== 'enter') {
+      for (const B of C.bossList(g)) if (B.state !== 'dying' && B.state !== 'enter') {
         const d = B.damage(475, 'ult'); B.stacks = 10; B.sprayedT = 0;
         if (d) C.dmgText(B.x, B.y - 120, d, '#d8ff7a', 50);
         C.Decals.add(B, B.x + C.rand(-150, 150), B.y + C.rand(-120, 120), C.pick([0, 2, 3, 5]), C.rand(90, 160), 15, 'venom_decal');
@@ -160,11 +167,12 @@
     if (g.rageT >= R.BLAST_VC) {
       g.rageActive = false; g.ragePhase = null; g.rage = 0; g.player.inv = 1.5; g.vcPts = null;
       for (let i = 0; i < 6; i++) C.Decals.add(null, C.rand(0, C.W), C.H - C.rand(40, 70), 4, C.rand(120, 200), 15, 'venom_decal'); // vũng dịch dưới đất
-      if (g.boss && g.boss.state === 'fight') { g.boss.stunT = 3; g.banner('BOSS NGỘP DỊCH — CHOÁNG!', 1.6, 'boss'); }
+      if (C.bossList(g).some(B => B.state === 'fight')) { C.bossList(g).forEach(B => { if (B.state === 'fight') B.stunT = 3; }); g.banner('BOSS NGỘP DỊCH — CHOÁNG!', 1.6, 'boss'); }
     }
   };
 
-  R.start = function (g) {
+  R.start = function (g, mode) {
+    g.rageMode = mode || R.defMode(g);
     g.rageActive = true; g.ragePhase = 'charge'; g.rageT = 0; g.rageTick = 0;
     C.Chem.power = 0; C.sfx.play('ult'); C.flash(0.4, '#ffe9a0');
   };
@@ -180,6 +188,7 @@
   // ---------------- vẽ ----------------
   R.drawBehind = function (ctx, g) { // aura sau lưng Calota
     if (!g.rageActive) return;
+    if (R.st(g)) { C.ST.drawBehind(ctx, g); if (g.ragePhase !== 'charge') return; }
     if (R.vc(g) && g.ragePhase !== 'charge') { R.drawInfinity(ctx, g); return; }
     const p = g.player, t = performance.now() / 1000;
     const k = g.ragePhase === 'charge' ? Math.min(1, g.rageT / R.CHARGE) : 1;
@@ -228,6 +237,7 @@
     ctx.restore();
   }
   R.drawCalota = function (ctx, g) {
+    if (R.st(g)) { C.ST.drawCalota(ctx, g); return; }
     if (R.vc(g)) {
       const p = g.player, t = performance.now() / 1000;
       if (g.ragePhase === 'charge') {

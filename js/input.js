@@ -8,7 +8,7 @@
   };
   const K = {
     left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'],
-    spray: ['Space', 'KeyJ'], ult: ['KeyK', 'KeyE'], rage: ['KeyQ', 'KeyU'], venom: ['KeyF', 'KeyO'], dash: ['ShiftLeft', 'ShiftRight', 'KeyL'], pause: ['KeyP', 'Escape']
+    spray: ['Space', 'KeyJ'], ult: ['KeyK', 'KeyE'], rage: ['KeyQ', 'KeyU'], venom: ['KeyF', 'KeyO'], rage2: ['KeyR', 'KeyY'], dash: ['ShiftLeft', 'ShiftRight', 'KeyL'], pause: ['KeyP', 'Escape']
   };
   const has = (arr) => arr.some(k => I.keys[k]);
   window.addEventListener('keydown', e => {
@@ -17,6 +17,7 @@
     if (K.ult.includes(e.code)) I.ultPressed = true;
     if (K.rage.includes(e.code)) I.ragePressed = true;
     if (K.venom.includes(e.code)) I.venomPressed = true;
+    if (K.rage2.includes(e.code)) I.rage2Pressed = true;
     if (K.dash.includes(e.code)) I.dashPressed = true;
     if (K.pause.includes(e.code)) I.pausePressed = true;
     if (K.spray.includes(e.code) || e.code.startsWith('Arrow')) e.preventDefault();
@@ -62,6 +63,7 @@
     hold('btnUlt', () => I.ultPressed = true);
     hold('btnRage', () => I.ragePressed = true);
     hold('btnVenom', () => I.venomPressed = true);
+    hold('btnRage2', () => I.rage2Pressed = true);
     hold('btnDash', () => I.dashPressed = true);
   };
 
@@ -74,5 +76,5 @@
     I.spray = has(K.spray) || !!I.sprayBtn;
   };
   I.consumeTouchDelta = function () { const d = { x: I.touch.dx, y: I.touch.dy }; I.touch.dx = I.touch.dy = 0; return d; };
-  I.endFrame = function () { I.ultPressed = I.ragePressed = I.venomPressed = I.dashPressed = I.pausePressed = false; };
+  I.endFrame = function () { I.ultPressed = I.ragePressed = I.rage2Pressed = I.venomPressed = I.dashPressed = I.pausePressed = false; };
 })(window.C);

@@ -7,7 +7,7 @@
 (function (C) {
   const V = C.Venom = { COST: 35, CD: 14, DUR: 6, ON: 0.45, UNLOCK: 3, TOUCH_DPS: 280, BOSS_DPS: 320, DROP_DMG: 28 };
 
-  V.unlocked = g => !!(g.gate && g.gate.id >= V.UNLOCK) || !!(C.debug && C.debug.venom);
+  V.unlocked = g => !!(g.gate && (g.gate.id >= V.UNLOCK || g.gate.allSkills)) || !!(C.debug && C.debug.venom);
   V.reset = g => { g.venomT = 0; g.venomOn = 0; g.venomCD = 0; g.venomDripT = 0; g.vdrops = []; };
   V.active = g => g.venomT > 0;
   V.ready = g => V.unlocked(g) && !(g.venomT > 0) && (g.venomCD || 0) <= 0 && g.gauge >= V.COST;

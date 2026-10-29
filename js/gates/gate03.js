@@ -113,7 +113,7 @@
         for (let i = 0; i < (this.phase === 3 ? 8 : 5); i++) { const a = Math.PI + C.rand(-1.2, 1.2), vv = C.rand(260, 420); g.ebullets.push({ kind: 'spike', x: this.x - 60, y: this.y + 40, vx: Math.cos(a) * vv, vy: Math.sin(a) * vv, r: 12, rot: 0, vr: 6, hp: 1 }); }
       }
     } else if (st === 'diveBack') {
-      const hx = 1010 + OX();
+      const hx = 1010 + this.ox();
       this.x = Math.min(hx, this.x + 620 * dt); this.y = C.lerp(this.y, 330, dt * 2);
       if (this.x >= hx - 2) { this.state = 'fight'; this.t = 0; }
     }

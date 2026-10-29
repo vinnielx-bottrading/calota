@@ -18,10 +18,12 @@
     p.anim += dt;
     if (p.dead) { p.deadT += dt; p.vy += 900 * dt; p.y += p.vy * dt; p.x += p.vx * dt; return; }
     if (g.rageActive) { p.vx = p.vy = 0; p.inv -= dt; I.consumeTouchDelta(); return; } // đứng yên gồng
-    const sp = 520;
+    p.slowT = Math.max(0, (p.slowT || 0) - dt);
+    const slow = p.slowT > 0 ? 0.5 : 1; // dính băng → chậm
+    const sp = 520 * slow;
     let tx = I.moveX * sp, ty = I.moveY * sp;
     const d = I.consumeTouchDelta();
-    if (I.touch.active || d.x || d.y) { p.x += d.x * 1.35; p.y += d.y * 1.35; tx = ty = 0; }
+    if (I.touch.active || d.x || d.y) { p.x += d.x * 1.35 * slow; p.y += d.y * 1.35 * slow; tx = ty = 0; }
     p.vx = C.lerp(p.vx, tx, Math.min(1, dt * 14)); p.vy = C.lerp(p.vy, ty, Math.min(1, dt * 14));
     // lướt
     p.dashCd -= dt;
@@ -54,7 +56,7 @@
     if (p.inv > 0 || p.dead || g.ultActive || g.rageActive || g.state !== 'play') return false;
     C.Rage.add(g, 12); // trúng đòn → nộ tăng
     if (p.shield > 0) { p.shield = 0; p.inv = 1; C.sfx.play('shieldBreak'); C.flash(0.3, '#7fd8ff'); for (let i = 0; i < 16; i++) { const a = i / 16 * 6.28; C.emit({ kind: 'glow', img: C.G.teal, x: p.x, y: p.y, vx: Math.cos(a) * 400, vy: Math.sin(a) * 400, drag: 3, max: 0.5, s0: 14, s1: 4, add: true, layer: 2 }); } return true; }
-    if ((g.gunLv || 1) > 1) { g.gunLv--; g.gunXP = 0; g.banner('Súng tụt cấp ' + g.gunLv, 1.2, 'small'); }
+    if ((g.gunLv || 1) > (g.gate.minGun || 1)) { g.gunLv--; g.gunXP = 0; g.banner('Súng tụt cấp ' + g.gunLv, 1.2, 'small'); }
     p.hp -= dmg; p.inv = 1.4; p.hurtT = 0.45; C.shake(14); C.flash(0.35, '#ff3b30'); C.sfx.play('hurt');
     p.vx = -500;
     for (let i = 0; i < 6; i++) C.emit({ kind: 'glow', img: C.G.white, x: p.x, y: p.y, vx: C.rand(-300, 300), vy: C.rand(-300, 300), drag: 3, max: 0.4, s0: 10, s1: 2, add: true, layer: 2 });
@@ -63,8 +65,9 @@
   };
   E.drawPlayer = function (ctx, g) {
     const p = g.player;
+    C.ST.drawEcho(ctx, g);
     if (g.rageActive) { C.Rage.drawCalota(ctx, g); return; }
-    if (C.Venom.draw(ctx, g)) { drawShield(ctx, p); return; }
+    if (C.Venom.draw(ctx, g)) { drawShield(ctx, p); drawFrost(ctx, p); return; }
     if (p.inv > 0 && !p.dead && Math.floor(p.inv * 20) % 2 === 0 && p.hurtT < 0) ctx.globalAlpha = 0.45;
     const tilt = C.clamp(p.vy / 1400, -0.18, 0.22);
     if (p.dead) C.spr(ctx, 'calota_fall', 0, p.x, p.y, 160, { rot: p.deadT * 6 });
@@ -74,8 +77,13 @@
     else if (p.dashT > 0) C.spr(ctx, 'calota_dash', Math.floor(p.anim * 14), p.x - 6, p.y + 2, 172, { rot: tilt });
     else C.spr(ctx, 'calota_fly', Math.floor(p.anim * 16), p.x, p.y, 150, { rot: tilt });
     ctx.globalAlpha = 1;
-    drawShield(ctx, p);
+    drawShield(ctx, p); drawFrost(ctx, p);
   };
+  function drawFrost(ctx, p) { // bị đóng băng: lớp sương xanh + tinh thể
+    if (!(p.slowT > 0) || p.dead) return;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(0.7, p.slowT * 0.5); ctx.drawImage(C.G.ice, p.x - 90, p.y - 80, 180, 160); ctx.restore();
+    if (Math.random() < 0.3) C.emit({ kind: 'glow', img: C.G.ice, x: p.x + C.rand(-40, 40), y: p.y + C.rand(-30, 30), vy: 30, max: 0.5, s0: 8, s1: 2, add: true, layer: 2 });
+  }
   function drawShield(ctx, p) {
     if (!(p.shield > 0) || p.dead) return;
     const t = p.anim;

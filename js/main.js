@@ -13,10 +13,11 @@
       const ok = unlocked(i), d = document.createElement('button');
       d.className = 'gateCard' + (i === sel ? ' sel' : '') + (ok ? '' : ' locked');
       const best = C.store.get('best' + gt.id, 0);
-      d.innerHTML = `<img src="${gt.thumb || 'assets/ui/g1_thumb.webp'}" alt=""><div><b>CỬA ${gt.id}${C.store.get('clear' + gt.id, false) ? ' ✓' : ''}</b><span>${gt.name}</span><small>${ok ? 'Boss: ' + (gt.bossShort || gt.bossName) : '🔒 Hạ boss cửa ' + (i) + ' để mở'}</small>${best ? `<small class="gb">Kỷ lục ${best.toLocaleString('vi-VN')}</small>` : ''}</div>`;
+      d.innerHTML = `<img src="${gt.thumb || 'assets/ui/g1_thumb.webp'}" alt=""><div><b>${gt.label || 'CỬA ' + gt.id}${C.store.get('clear' + gt.id, false) ? ' ✓' : ''}</b><span>${gt.name}</span><small>${ok ? 'Boss: ' + (gt.bossShort || gt.bossName) : '🔒 Hạ boss ' + (C.GATES[i - 1].label || 'cửa ' + C.GATES[i - 1].id) + ' để mở'}</small>${best ? `<small class="gb">Kỷ lục ${best.toLocaleString('vi-VN')}</small>` : ''}</div>`;
       d.onclick = () => { if (!ok) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); return; } sel = i; C.store.set('gateSel', i); renderGates(); };
       el.appendChild(d);
     });
+    const se = el.querySelector('.sel'); if (se && se.scrollIntoView) try { se.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { }
   }
 
   const ui = C.ui = {};
@@ -27,7 +28,7 @@
   function fmt(s) { const m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + String(r).padStart(2, '0'); }
   ui.showWin = function (r) {
     $('winStats').innerHTML = `<div><b>${r.score.toLocaleString('vi-VN')}</b><span>Điểm</span></div><div><b>${r.coins}</b><span>Xu</span></div><div><b>${fmt(r.bossTime)}</b><span>Hạ boss</span></div><div><b>${Math.max(0, r.hp)}/5</b><span>Máu còn</span></div>`;
-    $('winBest').textContent = 'Kỷ lục cửa ' + g.gate.id + ': ' + r.best.toLocaleString('vi-VN');
+    $('winBest').textContent = 'Kỷ lục ' + (g.gate.label || 'cửa ' + g.gate.id) + ': ' + r.best.toLocaleString('vi-VN');
     $('winText').textContent = g.gate.winText || 'Khinh Khí Cầu Gai Rêu đã tan xác.';
     const hasNext = g.gateIdx + 1 < C.GATES.length;
     $('btnNext').style.display = hasNext ? '' : 'none'; $('winSoon').style.display = hasNext ? 'none' : '';
@@ -35,15 +36,16 @@
     setTimeout(() => { if (g.state === 'win') C.donate.open('end', 'win'); }, 2200);
   };
   ui.showLose = function (r) {
-    $('loseInfo').textContent = r.boss ? `Boss còn ${Math.ceil(r.bossHp * 100)}% máu — cố lên!` : 'Calota đã bị hạ giữa đường bay.';
+    $('loseInfo').textContent = g.gate.allSkills ? `Gục ở vòng ${g.gate.curRound + 1}/${g.gate.rounds.length} — đánh lại đúng vòng này!` : r.boss ? `Boss còn ${Math.ceil(r.bossHp * 100)}% máu — cố lên!` : 'Calota đã bị hạ giữa đường bay.';
     // Đánh tiếp: boss vào lại với máu = phần còn + 1/2 phần đã mất (vd. còn 10% → 55%), tối đa 3 lần
     const left = g.resumesLeft || 0, nf = Math.min(1, r.bossHp + (1 - r.bossHp) / 2);
     ui.resumeFrac = nf;
-    $('btnResumeBoss').style.display = r.boss && left > 0 ? '' : 'none';
+    $('btnResumeBoss').style.display = r.boss && left > 0 && !g.gate.noResume ? '' : 'none';
+    $('btnRetryBoss').textContent = g.gate.noResume ? 'Đánh lại vòng này' : 'Đánh lại Boss từ đầu';
     $('btnResumeBoss').innerHTML = `Đánh tiếp Boss <small>(boss ${Math.round(nf * 100)}% máu · còn ${left} lượt)</small>`;
     $('btnRetryBoss').style.display = r.boss ? '' : 'none';
-    $('btnRetryBoss').classList.toggle('big', r.boss && left <= 0);
-    if (r.boss && left <= 0) $('loseInfo').textContent += ' Hết lượt đánh tiếp — đánh lại Boss từ đầu nhé!';
+    $('btnRetryBoss').classList.toggle('big', r.boss && (left <= 0 || !!g.gate.noResume));
+    if (r.boss && left <= 0 && !g.gate.noResume) $('loseInfo').textContent += ' Hết lượt đánh tiếp — đánh lại Boss từ đầu nhé!';
     ui.show('lose');
     // khi thua chỉ mời 1 lần mỗi phiên để không phiền
     let dnSeen = true; try { dnSeen = !!sessionStorage.getItem('calota_dn_lose'); sessionStorage.setItem('calota_dn_lose', '1'); } catch (e) { }
@@ -93,6 +95,8 @@
     g.update(dt); C.render(); C.input.endFrame();
     document.body.classList.toggle('venomOn', g.state === 'play' && C.Venom.unlocked(g));
     const vb = document.getElementById('btnVenom'); if (vb) { vb.classList.toggle('ready', C.Venom.ready(g)); vb.classList.toggle('on', g.venomT > 0); }
+    document.body.classList.toggle('rush', g.state === 'play' && !!(g.gate && g.gate.allSkills));
+    const rb2 = document.getElementById('btnRage2'); if (rb2) rb2.classList.toggle('ready', (g.rage || 0) >= 100 && !g.rageActive);
     const rb = document.getElementById('btnRage'); if (rb) rb.classList.toggle('ready', (g.rage || 0) >= 100 && !g.rageActive);
     requestAnimationFrame(frame);
   }

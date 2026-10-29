@@ -680,5 +680,213 @@
   "n": 4,
   "ax": 120.0,
   "ay": 150.0
+ },
+ "g4_boss_idle": {
+  "file": "assets/sprites/g4_boss_idle.webp",
+  "fw": 440,
+  "fh": 346,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 173.0
+ },
+ "g4_boss_attack": {
+  "file": "assets/sprites/g4_boss_attack.webp",
+  "fw": 440,
+  "fh": 346,
+  "n": 4,
+  "ax": 220.0,
+  "ay": 173.0
+ },
+ "g4_boss_special": {
+  "file": "assets/sprites/g4_boss_special.webp",
+  "fw": 475,
+  "fh": 500,
+  "n": 4,
+  "ax": 237.5,
+  "ay": 250.0
+ },
+ "g4_boss_defeat": {
+  "file": "assets/sprites/g4_boss_defeat.webp",
+  "fw": 345,
+  "fh": 440,
+  "n": 4,
+  "ax": 172.5,
+  "ay": 220.0
+ },
+ "g4_boss_ram": {
+  "file": "assets/sprites/g4_boss_ram.webp",
+  "fw": 375,
+  "fh": 480,
+  "n": 4,
+  "ax": 187.5,
+  "ay": 240.0
+ },
+ "g4_boss_foam": {
+  "file": "assets/sprites/g4_boss_foam.webp",
+  "fw": 460,
+  "fh": 312,
+  "n": 2,
+  "ax": 230.0,
+  "ay": 156.0
+ },
+ "g4_penguin": {
+  "file": "assets/sprites/g4_penguin.webp",
+  "fw": 169,
+  "fh": 220,
+  "n": 4,
+  "ax": 84.5,
+  "ay": 110.0
+ },
+ "g4_penguin_shoot": {
+  "file": "assets/sprites/g4_penguin_shoot.webp",
+  "fw": 169,
+  "fh": 220,
+  "n": 4,
+  "ax": 84.5,
+  "ay": 110.0
+ },
+ "g4_owl": {
+  "file": "assets/sprites/g4_owl.webp",
+  "fw": 204,
+  "fh": 230,
+  "n": 4,
+  "ax": 102.0,
+  "ay": 115.0
+ },
+ "g4_owl_shoot": {
+  "file": "assets/sprites/g4_owl_shoot.webp",
+  "fw": 204,
+  "fh": 230,
+  "n": 4,
+  "ax": 102.0,
+  "ay": 115.0
+ },
+ "g4_pillar_top": {
+  "file": "assets/sprites/g4_pillar_top.webp",
+  "fw": 520,
+  "fh": 404,
+  "n": 1,
+  "ax": 260.0,
+  "ay": 202.0
+ },
+ "g4_pillar_bottom": {
+  "file": "assets/sprites/g4_pillar_bottom.webp",
+  "fw": 520,
+  "fh": 339,
+  "n": 1,
+  "ax": 260.0,
+  "ay": 169.5
+ },
+ "g4_rock": {
+  "file": "assets/sprites/g4_rock.webp",
+  "fw": 195,
+  "fh": 220,
+  "n": 1,
+  "ax": 97.5,
+  "ay": 110.0
+ },
+ "g4_vine": {
+  "file": "assets/sprites/g4_vine.webp",
+  "fw": 320,
+  "fh": 201,
+  "n": 1,
+  "ax": 160.0,
+  "ay": 100.5
+ },
+ "g4_proj_big": {
+  "file": "assets/sprites/g4_proj_big.webp",
+  "fw": 200,
+  "fh": 105,
+  "n": 1,
+  "ax": 100.0,
+  "ay": 52.5
+ },
+ "g4_snowball": {
+  "file": "assets/sprites/g4_snowball.webp",
+  "fw": 200,
+  "fh": 154,
+  "n": 1,
+  "ax": 100.0,
+  "ay": 77.0
+ },
+ "g4_muzzle": {
+  "file": "assets/sprites/g4_muzzle.webp",
+  "fw": 240,
+  "fh": 175,
+  "n": 1,
+  "ax": 120.0,
+  "ay": 87.5
+ },
+ "g4_impact": {
+  "file": "assets/sprites/g4_impact.webp",
+  "fw": 260,
+  "fh": 181,
+  "n": 1,
+  "ax": 130.0,
+  "ay": 90.5
+ },
+ "calota_st_grow": {
+  "file": "assets/sprites/calota_st_grow.webp",
+  "fw": 273,
+  "fh": 320,
+  "n": 4,
+  "ax": 136.5,
+  "ay": 160.0
+ },
+ "calota_st_split": {
+  "file": "assets/sprites/calota_st_split.webp",
+  "fw": 302,
+  "fh": 360,
+  "n": 4,
+  "ax": 151.0,
+  "ay": 180.0
+ },
+ "shadow_fly": {
+  "file": "assets/sprites/shadow_fly.webp",
+  "fw": 224,
+  "fh": 300,
+  "n": 4,
+  "ax": 112.0,
+  "ay": 150.0
+ },
+ "shadow_spray": {
+  "file": "assets/sprites/shadow_spray.webp",
+  "fw": 340,
+  "fh": 340,
+  "n": 3,
+  "ax": 170.0,
+  "ay": 170.0
+ },
+ "yinyang": {
+  "file": "assets/sprites/yinyang.webp",
+  "fw": 900,
+  "fh": 887,
+  "n": 1,
+  "ax": 450.0,
+  "ay": 443.5
+ },
+ "foam_vortex": {
+  "file": "assets/sprites/foam_vortex.webp",
+  "fw": 300,
+  "fh": 300,
+  "n": 4,
+  "ax": 150.0,
+  "ay": 150.0
+ },
+ "foam_trap": {
+  "file": "assets/sprites/foam_trap.webp",
+  "fw": 220,
+  "fh": 220,
+  "n": 4,
+  "ax": 110.0,
+  "ay": 110.0
+ },
+ "scene_goo": {
+  "file": "assets/sprites/scene_goo.webp",
+  "fw": 220,
+  "fh": 220,
+  "n": 6,
+  "ax": 110.0,
+  "ay": 110.0
  }
 }

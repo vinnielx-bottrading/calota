@@ -18,6 +18,7 @@ Khi cần sửa hoặc thay ảnh, chỉ cần đổi file ở đây rồi chạ
 | `00-dung-chung/chieu-tuyet-menh` | Gồng aura + ngửa mặt phun trời | `calota_rage_charge`, `calota_rage_sky` |
 | `00-dung-chung/chieu-giap-noc-doc` | N1 kích hoạt · N2 bay khoác giáp · N3 giọt/vết nọc (mở từ cửa 3) | `calota_venom_on`, `calota_venom_fly`, `venom_fx` |
 | `00-dung-chung/chieu-tuyet-menh-vo-cuc` | N5 bay vòng ∞ · N6 vòng ∞ sáng · N7 ngửa cổ phun · N8 cháy nổ · N9 dịch đọng (từ cửa 3) | `calota_loop`, `infinity_ring`, `calota_vc_sky`, `toxic_explode`, `venom_decal` |
+| `00-dung-chung/chieu-hac-song-trung` | O1 phóng to · O2 tách thân · O3 bóng đen bay · O4 bóng đen phun · O5 ☯ · O6 lốc bọt · O7 quái bị bọc bọt · O8 bọt bám cây cỏ (từ cửa 4) | `calota_st_grow`, `calota_st_split`, `shadow_fly`, `shadow_spray`, `yinyang`, `foam_vortex`, `foam_trap`, `scene_goo` |
 | `00-dung-chung/hieu-ung-them` | X24 hiệu ứng đạn nọc, X25 hiệu ứng bọt (dự phòng, chưa dùng) | — |
 | `00-dung-chung/_can-gen-lai` | Ảnh gửi nhầm, giữ để tham khảo (SAI-N4) | — |
 | `00-dung-chung/logo-vat-pham-hieu-ung` | Logo, vật phẩm (xu, khiên, sét, tim), hiệu ứng nổ/tia | `logo`, `item_*`, `hitspark`, `muzzle`… |
@@ -36,6 +37,12 @@ Khi cần sửa hoặc thay ảnh, chỉ cần đổi file ở đây rồi chạ
 | `03-cua3-hem-nui-cat-do/thumbnail` | L3th ảnh thẻ cửa 3 | `assets/ui/g3_thumb` |
 | `03-cua3-hem-nui-cat-do/quai` | L3mg thằn lằn ống phóng · L3mh bọ cạp pháo (nền caro giả, tự tách) | `g3_lizard*`, `g3_scorpion*` |
 | `03-cua3-hem-nui-cat-do/_can-gen-lai` | Ảnh gửi nhầm lần đầu (SAI-…), giữ tham khảo | — |
+
+| `04-cua4-dinh-bang-tuyet/boss-ca-voi-phao-bang` | L4a concept · L4b đứng yên + bắn · L4c tia băng · L4d đau, bị hạ · L4e ngộp bọt · L4r lao cụng | `g4_boss_*` |
+| `04-cua4-dinh-bang-tuyet/quai` | L4mg cánh cụt pháo băng · L4mh cú tuyết ống phóng | `g4_penguin*`, `g4_owl*` |
+| `04-cua4-dinh-bang-tuyet/dan-hieu-ung` | L4f đạn băng, cầu tuyết, lửa nòng băng, nổ băng | `g4_proj_big`, `g4_snowball`, `g4_muzzle`, `g4_impact` |
+| `04-cua4-dinh-bang-tuyet/nen-vat-can` | L4bg nền xa cực quang · L4bm nền giữa · L4fg lớp gần · L4ob vật cản | `assets/bg/g4_*`, `g4_pillar_*`, `g4_rock`, `g4_vine` |
+| `04-cua4-dinh-bang-tuyet/thumbnail` | L4th ảnh thẻ cửa 4 (cũng dùng cho Đấu Trường Boss) | `assets/ui/g4_thumb` |
 
 Thư mục `_can-gen-lai` chứa ảnh không đúng prompt. Tên bắt đầu bằng `SAI-` nên công cụ dựng bỏ qua. Khi có ảnh đúng, đặt vào nhóm tương ứng với tên bắt đầu bằng mã prompt, ví dụ `L3mg Than lan.png`.
 | `90-am-thanh-goc` | Nhạc menu, đoạn bay, đánh boss, thắng; tiếng rống Tuyệt Mệnh (bản gốc 256 kbps) | `assets/audio/*.mp3` |
@@ -61,6 +68,9 @@ python tools/build_gate.py source/02-cua2-dam-lay-doc 2 .
 
 # cửa 3 + chiêu mới Giáp Nọc Độc, Tuyệt Mệnh Vô Cực (~2 phút)
 python tools/build_gate.py source 3 .
+
+# cửa 4 + tuyệt chiêu Hắc Song Trùng (~2 phút)
+python tools/build_gate.py source 4 .
 ```
 
 Kết quả được ghi vào `assets/sprites/`, `assets/bg/`, `assets/ui/`, cùng `assets/sprites.js` và `sprites.json`.

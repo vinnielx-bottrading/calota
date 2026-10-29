@@ -17,13 +17,14 @@
     g.resumeFrac = resume == null ? null : resume;
     if (resume == null) g.resumesLeft = g.RESUMES;
     g.gateIdx = gateIdx || 0; g.gate = C.GATES[g.gateIdx]; C.skin = g.gate.skin || {};
-    g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null;
+    g.player = E.Player(); g.bullets = []; g.ebullets = []; g.enemies = []; g.items = []; g.boss = null; g.bosses = []; C.ST.reset(g);
     C.particles.length = 0; g.banners = []; C.Decals.clear(); g.decalT = 0; C.Rage.reset(g); C.Venom.reset(g); if (fromBoss) g.rage = 50;
     g.gauge = fromBoss ? 60 : 20; g.score = fromBoss ? g.checkpointScore || 0 : 0; g.coins = fromBoss ? g.checkpointCoins || 0 : 0; g.kills = 0;
     g.gunLv = fromBoss ? g.checkpointGun || 2 : 1; g.gunXP = 0;
     g.ultActive = false; g.ultT = 0; g.cutin = 0; C.Chem.power = 0; C.Chem.ult = false;
     g.events = g.gate.timeline(); g.evI = 0; g.t = 0; g.bossT = 0; g.state = 'play'; g.startedAt = performance.now();
     if (fromBoss) { g.t = g.gate.stageTime - 0.5; while (g.evI < g.events.length && g.events[g.evI].t < g.t) g.evI++; g.player.hp = g.player.maxHp; }
+    if (g.gate.onStart) g.gate.onStart(g, !!fromBoss);
     if (C.debug.ult) g.gauge = 100;
     C.sfx.music(fromBoss ? 'boss' : 'stage');
     C.ui.show(null);
@@ -35,10 +36,12 @@
     let n = 0; const iv = setInterval(() => { C.sfx.play('warn'); if (++n >= 4) clearInterval(iv); }, 800);
   };
   g.startBoss = function () {
-    g.boss = g.gate.makeBoss(g); if (g.resumeFrac != null && g.boss.resumeAt) g.boss.resumeAt(g.resumeFrac); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv;
+    if (g.gate.startBoss) { g.gate.startBoss(g); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv; C.sfx.music('boss'); return; }
+    g.boss = g.gate.makeBoss(g); g.boss.skin = g.gate.skin; g.bosses = [g.boss]; if (g.resumeFrac != null && g.boss.resumeAt) g.boss.resumeAt(g.resumeFrac); g.bossT = 0; g.checkpoint = true; g.checkpointScore = g.score; g.checkpointCoins = g.coins; g.checkpointGun = g.gunLv;
     C.sfx.music('boss'); g.banner(g.gate.bossName, 2.6, 'boss'); C.shake(12);
   };
-  g.onBossDefeated = function () {
+  g.onBossDefeated = function (B) {
+    if (g.gate.onBossDown && g.gate.onBossDown(g, B)) return; // Đấu trường: còn vòng tiếp
     setTimeout(() => {
       if (g.state !== 'play') return;
       g.state = 'win'; C.sfx.play('win'); C.sfx.hiss(0); C.Chem.power = 0; C.Chem.active = false;
@@ -49,7 +52,7 @@
   };
   g.onPlayerDead = function () {
     C.sfx.play('lose'); C.sfx.music(null); C.sfx.hiss(0); g.ultActive = false;
-    setTimeout(() => { if (g.state === 'play') { g.state = 'lose'; C.Chem.power = 0; C.Chem.active = false; C.ui.showLose({ score: g.score, boss: !!g.boss, bossHp: g.boss ? g.boss.hp / g.boss.maxHp : 1 }); } }, 1500);
+    setTimeout(() => { if (g.state === 'play') { g.state = 'lose'; C.Chem.power = 0; C.Chem.active = false; C.ui.showLose({ score: g.score, boss: !!g.boss || !!g.gate.allSkills, bossHp: g.boss ? C.bossList(g).reduce((a, B) => a + Math.max(0, B.hp), 0) / C.bossList(g).reduce((a, B) => a + B.maxHp, 0) : 1 }); } }, 1500);
   };
   g.addGauge = function (v) { if (!g.ultActive) g.gauge = C.clamp(g.gauge + v, 0, 100); };
   g.pickup = function (it) {
@@ -104,8 +107,7 @@
         if (b.hp <= 0) { b.dead = true; C.Chem.splash(b.x, b.y, 1); g.score += 20; }
       }
     }
-    const B = g.boss;
-    if (B && B.state !== 'dying' && B.state !== 'enter') {
+    for (const B of C.bossList(g)) if (B.state !== 'dying' && B.state !== 'enter') {
       for (const [cx, cy, r] of B.hitCircles()) {
         const d = Ch.inCone(cx, cy, r);
         if (d >= 0 && d < nearest) {
@@ -124,7 +126,7 @@
     g.decalT -= dt;
     if (hp && hitEnt && g.decalT <= 0) {
       g.decalT = ult ? 0.05 : 0.14;
-      const spread = ult ? 150 : 60, big = hitEnt === B ? 1.3 : 1;
+      const spread = ult ? 150 : 60, big = hitEnt && hitEnt.hitCircles ? 1.3 : 1;
       C.Decals.add(hitEnt, hp.x + C.rand(0, ult ? 160 : 70), hp.y + C.rand(-spread, spread), C.randi(0, 3), C.rand(55, ult ? 150 : 100) * big, C.rand(5, 8));
     }
     g.sprayAccT += dt;
@@ -151,6 +153,8 @@
     E.updatePlayer(g, dt);
     C.Rage.update(g, dt, rdt);   // CHIÊU TUYỆT MỆNH
     C.Venom.update(g, dt);       // GIÁP NỌC ĐỘC (cửa 3+)
+    C.ST.updateEcho(g, dt);      // dư âm Hắc Song Trùng
+    if (g.gate.tick) g.gate.tick(g, dt);
 
     // ---- Siêu phun ----
     if (I.ultPressed && g.gauge >= 100 && !g.ultActive && !g.rageActive && !p.dead) {
@@ -160,7 +164,7 @@
     let sprayOn = false;
     if (g.ultActive && g.cutin <= 0) {
       g.ultT -= dt; g.gauge = Math.max(0, 100 * g.ultT / 2.8); C.shake(7);
-      if (g.ultT <= 0) { g.ultActive = false; g.gauge = 0; if (g.boss && g.boss.state === 'fight') { g.boss.stunT = 1.4; g.banner('BOSS CHOÁNG!', 1.2, 'boss'); } }
+      if (g.ultT <= 0) { g.ultActive = false; g.gauge = 0; if (C.bossList(g).some(B => B.state === 'fight')) { C.bossList(g).forEach(B => { if (B.state === 'fight') B.stunT = 1.4; }); g.banner('BOSS CHOÁNG!', 1.2, 'boss'); } }
     } else if (!g.ultActive && !g.rageActive && I.spray && g.gauge > 0 && !p.dead) {
       sprayOn = true; g.gauge = Math.max(0, g.gauge - GAUGE_DRAIN * dt);
     }
@@ -168,7 +172,7 @@
     C.Chem.update(dt, sprayOn, g.ultActive && g.cutin <= 0, n.x, n.y);
     if (C.Chem.active && !g.ultActive) C.shake(2.2 * C.Chem.power);
     applySpray(dt);
-    if (!g.ultActive) g.addGauge(GAUGE_PASSIVE * dt);
+    if (!g.ultActive) g.addGauge(GAUGE_PASSIVE * (g.gate.gaugeMul || 1) * dt);
 
     // ---- đạn Calota ----
     for (const b of g.bullets) {
@@ -185,8 +189,7 @@
         if (e.hp <= 0) killEnemy(e, false); else C.sfx.play('hit');
         break;
       }
-      const B = g.boss;
-      if (!b.dead && B && B.state !== 'dying') for (const [cx, cy, r] of B.hitCircles()) if (C.dist2(cx, cy, b.x, b.y) < (r + b.r) * (r + b.r)) {
+      for (const B of C.bossList(g)) if (!b.dead && B.state !== 'dying') for (const [cx, cy, r] of B.hitCircles()) if (C.dist2(cx, cy, b.x, b.y) < (r + b.r) * (r + b.r)) {
         b.dead = true; const d = B.damage(b.dmg, 'bullet');
         C.spark(b.x, b.y, B.shield > 0 ? 40 : 60); g.addGauge(0.5); g.score += Math.round(d);
         if (B.shield > 0) C.emit({ kind: 'glow', img: C.G.toxic, x: b.x, y: b.y, max: 0.2, s0: 20, s1: 40, add: true, layer: 2 });
@@ -199,10 +202,10 @@
     for (const b of g.ebullets) {
       if (b.grav) b.vy += b.grav * dt;
       b.x += b.vx * dt; b.y += b.vy * dt; b.rot += b.vr * dt;
-      if (b.grav && b.y > C.H - 50 && b.kind === 'bomb') { b.dead = true; C.explode(b.x, C.H - 70, 170); C.emit({ kind: 'img', img: 'g3_impact', x: b.x, y: C.H - 90, max: 0.5, s0: 160, s1: 260, layer: 2 }); C.sfx.play('explode'); C.shake(8); for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + C.rand(-1.1, 1.1), v = C.rand(320, 520); g.ebullets.push({ kind: 'spike', x: b.x, y: C.H - 70, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 12, rot: 0, vr: 6, hp: 1 }); } }
+      if (b.grav && b.y > C.H - 50 && b.kind === 'bomb') { b.dead = true; C.explode(b.x, C.H - 70, 170); C.emit({ kind: 'img', img: b.impact || 'g3_impact', x: b.x, y: C.H - 90, max: 0.5, s0: 160, s1: 260, layer: 2 }); C.sfx.play('explode'); C.shake(8); for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + C.rand(-1.1, 1.1), v = C.rand(320, 520); g.ebullets.push({ kind: 'spike', x: b.x, y: C.H - 70, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 12, rot: 0, vr: 6, hp: 1 }); } }
       else if (b.grav && b.y > C.H - 50) { b.dead = true; C.emit({ kind: 'img', img: 'g2_venom_puddle', x: b.x, y: C.H - 40 + C.rand(-6, 6), vx: -250, max: 2.2, s0: 70, s1: 110, layer: 1 }); }
       else if (b.x < -60 || b.x > C.W + 80 || b.y < -60 || b.y > C.H + 60) b.dead = true;
-      else if (!p.dead && C.dist2(b.x, b.y, p.x, p.y) < (b.r * 0.8 + p.r) * (b.r * 0.8 + p.r)) { if (E.hurtPlayer(g, 1)) { b.dead = true; if (b.kind === 'venom' || b.kind === 'glob') C.emit({ kind: 'img', img: 'g2_venom_splash', x: b.x, y: b.y, max: 0.4, s0: 90, s1: 170, layer: 2 }); else C.explode(b.x, b.y, 110); } }
+      else if (!p.dead && C.dist2(b.x, b.y, p.x, p.y) < (b.r * 0.8 + p.r) * (b.r * 0.8 + p.r)) { if (E.hurtPlayer(g, 1)) { b.dead = true; if (b.chill) p.slowT = 1.6; if (b.kind === 'venom' || b.kind === 'glob') C.emit({ kind: 'img', img: 'g2_venom_splash', x: b.x, y: b.y, max: 0.4, s0: 90, s1: 170, layer: 2 }); else C.explode(b.x, b.y, 110); } }
     }
     g.ebullets = g.ebullets.filter(b => !b.dead);
 
@@ -219,7 +222,7 @@
     }
     g.enemies = g.enemies.filter(e => !e.dead);
     E.updateItems(g, dt);
-    if (g.boss) g.boss.update(dt);
+    for (const B of C.bossList(g).slice()) { const sk = C.skin; if (B.skin) C.skin = B.skin; B.update(dt); C.skin = sk; }
     C.updateParticles(dt); C.Decals.update(dt, 200);
     for (const b of g.banners) b.t += rdt;
     g.banners = g.banners.filter(b => b.t < b.max);

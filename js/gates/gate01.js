@@ -74,6 +74,7 @@
   const B = Airship.prototype;
   B.muzzle = function () { return { x: this.x - this.w * 0.42, y: this.y + 8 }; };
   B.hitCircles = function () { return [[this.x + 10, this.y - 20, this.r], [this.x - 120, this.y + 10, 45], [this.x, this.y + 120, 60]]; };
+  B.ox = function () { return OX() + (this.xOff || 0); };   // Đấu trường: 2 boss đứng lệch nhau
   B.mult = function () { return 1 + this.stacks * 0.08; };
 
   /** src: 'bullet' | 'spray' | 'ult'. Trả về sát thương thực */
@@ -102,7 +103,7 @@
     C.shake(20); C.sfx.play('explode'); C.sfx.play('warn');
     this.g.banner(n === 2 ? (this.txt2 || 'GIÁP RÊU! Xịt DỊCH ĐỘC để đốt nhanh') : (this.txt3 || 'NỔI GIẬN! Giáp rêu dày hơn'), 2.4, 'boss');
     for (let i = 0; i < 30; i++) { const a = C.rand(0, 6.28); C.emit({ kind: 'glow', img: C.G.toxic, x: this.x + Math.cos(a) * 160, y: this.y + Math.sin(a) * 160, vx: -Math.cos(a) * 200, vy: -Math.sin(a) * 200, max: 0.8, s0: 40, s1: 10, layer: 2 }); }
-    this.state = 'fight'; this.x = Math.max(this.x, 980 + OX());
+    this.state = 'fight'; this.x = Math.max(this.x, 980 + this.ox());
     // TIẾP TẾ: boss rơi 1 quả tim khi đổi giai đoạn nếu Calota đang yếu — phải tự lao vào nhặt
     if (this.g.player.hp <= 3 && !this.g.player.dead) {
       C.E.drop(this.g, 'heart', this.x - 150, this.y, { vx: -95, wave: true, y0: C.clamp(this.y, 200, 520) });
@@ -142,8 +143,8 @@
     if (this.stacks > 0) C.Chem.corrode(this.x, this.y, this.w, this.w * 0.8, this.stacks / 10);
 
     if (this.state === 'enter') {
-      this.x = C.lerp(this.x, 1010 + OX(), dt * 1.4);
-      if (this.x < 1030 + OX()) { this.state = 'fight'; this.t = 0; }
+      this.x = C.lerp(this.x, 1010 + this.ox(), dt * 1.4);
+      if (this.x < 1030 + this.ox()) { this.state = 'fight'; this.t = 0; }
       return;
     }
     if (this.state === 'dying') {
@@ -151,16 +152,16 @@
       if (Math.random() < 0.35) C.explode(this.x + C.rand(-150, 150), this.y + C.rand(-130, 130), C.rand(120, 220));
       if (Math.random() < 0.2) C.sfx.play('explode');
       C.shake(10);
-      if (this.t > 3.2 && !this.done) { this.done = true; C.explode(this.x, this.y, 520); C.flash(1, '#fff'); g.onBossDefeated(); }
+      if (this.t > 3.2 && !this.done) { this.done = true; C.explode(this.x, this.y, 520); C.flash(1, '#fff'); g.onBossDefeated(this); }
       return;
     }
     // di chuyển: bám theo độ cao của Calota + nhấp nhô
     this.hurtT = (this.hurtT || 0) - dt; this.stunT = (this.stunT || 0) - dt; this.ramDizzy = (this.ramDizzy || 0) - dt;
-    if (this.state === 'fight' && this.stunT > 0) { this.x = C.lerp(this.x, 1040 + OX(), dt * 2); this.y += Math.sin(this.anim * 3) * 0.6; }
+    if (this.state === 'fight' && this.stunT > 0) { this.x = C.lerp(this.x, 1040 + this.ox(), dt * 2); this.y += Math.sin(this.anim * 3) * 0.6; }
     else if (this.state === 'fight') {
-      const ty = C.clamp(p.y + Math.sin(this.t * 0.9) * 120, 170, 560);
+      const ty = C.clamp(p.y + (this.yOff || 0) + Math.sin(this.t * 0.9) * 120, 170 + (this.yOff > 0 ? 120 : 0), 560 - (this.yOff < 0 ? 120 : 0));
       this.y = C.lerp(this.y, ty, dt * (this.phase === 3 ? 1.3 : 0.8));
-      this.x = C.lerp(this.x, 1010 + OX() + Math.sin(this.t * 0.6) * 40, dt * 2);
+      this.x = C.lerp(this.x, 1010 + this.ox() + Math.sin(this.t * 0.6) * 40, dt * 2);
       this.attacks(dt);
       // LAO TỚI & CỤNG — chiêu chung của mọi boss, dồn dập hơn theo giai đoạn
       this.chargeT -= dt;
@@ -180,7 +181,7 @@
       }
     } else if (this.state === 'back') {
       this.x += 520 * dt;
-      if (this.x > 1000 + OX()) { this.ramDizzy = 0.6; this.state = 'fight'; this.chargeT = this.phase === 1 ? 13 : this.phase === 2 ? 10 : 7; }
+      if (this.x > 1000 + this.ox()) { this.ramDizzy = 0.6; this.state = 'fight'; this.chargeT = this.phase === 1 ? 13 : this.phase === 2 ? 10 : 7; }
     }
     // va chạm thân boss
     if (!p.dead) for (const [cx, cy, r] of this.hitCircles()) if (C.dist2(cx, cy, p.x, p.y) < (r + p.r) * (r + p.r)) { C.Venom.touchBoss(g, this, dt); C.E.hurtPlayer(g, 1); break; }
